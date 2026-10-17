@@ -18,6 +18,7 @@ class ToolCall:
     name: str
     arguments: dict[str, Any]
     origin: str = "policy"
+    parse_error: str | None = None
 
 
 @dataclass

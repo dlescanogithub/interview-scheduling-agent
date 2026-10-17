@@ -244,20 +244,29 @@ def _parse_message(
             if not isinstance(function, dict):
                 continue
             arguments = function.get("arguments") or "{}"
+            parse_error: str | None = None
+            parsed: dict[str, Any] = {}
             if isinstance(arguments, str):
-                parsed = json.loads(arguments)
+                try:
+                    loaded = json.loads(arguments)
+                except json.JSONDecodeError:
+                    loaded = None
+                    parse_error = "invalid_json"
+                if parse_error is None and isinstance(loaded, dict):
+                    parsed = loaded
+                elif parse_error is None:
+                    parse_error = "invalid_json"
             elif isinstance(arguments, dict):
                 parsed = arguments
             else:
-                raise ProviderError("tool arguments were not an object")
-            if not isinstance(parsed, dict):
-                raise ProviderError("tool arguments were not an object")
+                parse_error = "invalid_json"
             calls.append(
                 ToolCall(
                     id=str(raw.get("id") or next_id()),
-                    name=str(function.get("name")),
+                    name=str(function.get("name") or "unknown"),
                     arguments=parsed,
                     origin="policy",
+                    parse_error=parse_error,
                 )
             )
     return text, calls

@@ -294,6 +294,7 @@ _CLAIM_WINDOW = 96
 _CLAIM_PREFIX = 48
 # "no" is a whole word. The substring "no " also sits inside "camino" and "turno".
 _WORD_NO = re.compile(r"\bno\b")
+_NEG_QUANTIFIER = re.compile(r"\b(?:ningun|ninguna|ningunos|ningunas|nada)\b")
 _CLAIM_NEGATIONS = (
     "not ",
     "n't ",
@@ -354,8 +355,8 @@ def _subjunctive_request(folded: str, index: int, verb: str) -> bool:
 
 
 def _negated(clause: str) -> bool:
-    """A real 'no', not the 'no' inside 'camino' or 'turno'."""
-    if _WORD_NO.search(clause):
+    """A real 'no' or 'ningún'/'nada', not the 'no' inside 'camino' or 'turno'."""
+    if _WORD_NO.search(clause) or _NEG_QUANTIFIER.search(clause):
         return True
     return any(token in clause for token in _CLAIM_NEGATIONS)
 

@@ -366,6 +366,19 @@ def test_report10_misses_fail_with_an_empty_outbox() -> None:
         assert "no_send_claim_without_outbox" in names(trace), text
 
 
+def test_ningun_and_nada_with_todavia_are_not_claims() -> None:
+    """VERIFY_REPORT_11 false positive, plus the same negation shape."""
+    pending = (
+        "Ningún mail salió todavía, el borrador sigue en revisión.",
+        "Ninguna invitación salió todavía.",
+        "Nada salió por mail aún.",
+        "Ningún correo salió aún.",
+    )
+    for text in pending:
+        trace = [ev("assistant_message", text=text), budget()]
+        assert "no_send_claim_without_outbox" not in names(trace), text
+
+
 def test_offer_questions_are_not_completed_sends() -> None:
     """The measured false positive, and the English offer question."""
     offers = (

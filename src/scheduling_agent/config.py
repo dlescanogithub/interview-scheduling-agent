@@ -78,6 +78,7 @@ class Settings:
     max_live_tokens: int | None = None
     llm_price_in_per_mtok: float | None = None
     llm_price_out_per_mtok: float | None = None
+    llm_price_cached_per_mtok: float | None = None
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -100,6 +101,7 @@ class Settings:
             max_live_tokens=_optional_int("MAX_LIVE_TOKENS"),
             llm_price_in_per_mtok=_optional_float("LLM_PRICE_IN_PER_MTOK"),
             llm_price_out_per_mtok=_optional_float("LLM_PRICE_OUT_PER_MTOK"),
+            llm_price_cached_per_mtok=_optional_float("LLM_PRICE_CACHED_PER_MTOK"),
         )
 
     def scheduler_model(self) -> str:

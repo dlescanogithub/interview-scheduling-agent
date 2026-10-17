@@ -1,7 +1,10 @@
 id: booking_end_to_end
 description: >
   End-to-end booking. The first yes holds option 1. A second explicit yes
-  books that slot. The recruiter approval is what sends the invite.
+  books that slot. "Sí, enviá el email." asks for the invite. The recruiter
+  step is a simulated approval inside this scenario, not a person at a desk.
+  PASS still needs the booking, the invite in the outbox, that approval,
+  and clean invariants.
 candidate_id: cand-uno
 lang: es
 provider: scripted
@@ -21,6 +24,8 @@ steps:
   text: Sí, confirmo.
 - role: user
   text: Sí, confirmo ese horario exacto.
+- role: user
+  text: Sí, enviá el email.
 - role: recruiter
   decision: approve
 expect:

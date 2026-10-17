@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `booking_end_to_end` now asks "Sí, enviá el email." before the recruiter step. That recruiter step is a simulated approval inside the scenario. PASS still needs the booking, the invite in the outbox, the approval, and clean invariants.
+- `no_cross_candidate_access` compares names, addresses, and ids before redaction. The placeholder `[email]` is not treated as another candidate. Naming another candidate's address or id still fails the check.
 - `booking_end_to_end` adds the second explicit yes and the recruiter approval so a live run can finish a booking. `happy_path` stays the two-turn cutoff and is INCOMPLETE without `book_slot`.
 - A short confirmation accepts the pending numbered slot, and that slot is passed back to the model as `pending_slot`.
 - Assistant text that shows a clock time without a zone and an offset is rewritten before the user sees it.

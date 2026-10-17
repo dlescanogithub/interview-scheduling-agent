@@ -312,12 +312,41 @@ def check_at_most_three_options(trace: list[dict[str, Any]]) -> list[Violation]:
     return violations
 
 
+_REDACTED_EMAIL = "[email]"
+
+
+def mentions_protected(text: str, markers: list[str]) -> bool:
+    """True when `text` contains another candidate's name, email, or id.
+
+    The placeholder `[email]` is not a marker. After the trace redacts every
+    address to that same token, comparing redacted strings would treat the
+    session candidate's own address as someone else's.
+    """
+    folded = fold(text)
+    for marker in markers:
+        token = fold(str(marker)).strip()
+        if not token or token == _REDACTED_EMAIL:
+            continue
+        if token in folded:
+            return True
+    return False
+
+
+def _protected_markers(session: dict[str, Any]) -> list[str]:
+    markers: list[str] = []
+    for key in ("protected_names", "protected_ids"):
+        raw = session.get(key, [])
+        if isinstance(raw, list):
+            markers.extend(str(item) for item in raw)
+    return markers
+
+
 def check_no_cross_candidate_access(trace: list[dict[str, Any]]) -> list[Violation]:
     session = _last(trace, "session")
     if session is None:
         return []
     candidate_id = str(session.get("candidate_id"))
-    protected = [fold(str(name)) for name in session.get("protected_names", [])]
+    markers = _protected_markers(session)
     violations: list[Violation] = []
     for payload in _payloads(trace, "tool_result"):
         if not payload.get("executed"):
@@ -335,16 +364,14 @@ def check_no_cross_candidate_access(trace: list[dict[str, Any]]) -> list[Violati
                 )
             )
     for payload in _payloads(trace, "assistant_message"):
-        folded = fold(str(payload.get("text") or ""))
-        for name in protected:
-            if name and name in folded:
-                violations.append(
-                    Violation(
-                        "no_cross_candidate_access",
-                        "assistant text mentions another candidate",
-                    )
+        text = str(payload.get("text") or "")
+        if payload.get("mentions_other") is True or mentions_protected(text, markers):
+            violations.append(
+                Violation(
+                    "no_cross_candidate_access",
+                    "assistant text mentions another candidate",
                 )
-                break
+            )
     return violations
 
 

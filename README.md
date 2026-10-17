@@ -1,8 +1,10 @@
 # interview-scheduling-agent
 
-The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Live on 2026-10-17, grok-4.20-0309-non-reasoning, `happy_path`, 3 runs: exit 3, invariants_passed=true, task_completed=false, INCOMPLETE 3/3, 0 bookings, no crashes. Numbered slots with a zone were fine in 3/3. "Sí, confirmo." stored pending_slot, held option 1, and asked for a second explicit confirmation; the scenario ended, so book_slot never ran. Cost US$0.00875 + US$0.00872 + US$0.00844 = US$0.02591 (about US$0.026), 4 calls each. End-to-end booking is pendiente de re-verificación con el escenario `booking_end_to_end`.
+The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Independent live check on 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=6 (a small sample, not a rate): 6/6 reached `book_slot` and scheduled, booking id `book-0002`. 3/6 were INCOMPLETE because the model never called `send_invite_email` and asked whether to send; the script ended there. 3/6 FAILed on a false positive in `no_cross_candidate_access`: the trace redacts every address to `[email]`, and the other candidates' addresses were redacted too, so naming the session candidate's own address matched. Total cost about US$0.07. Per-run amounts and token counts were not recorded. None of the six was a legitimate PASS. The recruiter step in `booking_end_to_end` is a simulated approval written into the scenario. PASS still requires `task_completed=true`: the booking, an invite in the outbox, that approval, and clean invariants. A PASS on a real model after the email turn is not measured yet.
 
-Measured with a real provider on that date: those three incomplete runs and that cost. A fake provider talking to a fake calendar only shows that the harness runs. Token counts for those calls were not recorded.
+An earlier check the same day, `happy_path`, 3 runs: INCOMPLETE 3/3, exit 3, 0 bookings. The scenario ended on the first "Sí, confirmo.", so `book_slot` never ran. Cost US$0.00875 + US$0.00872 + US$0.00844 = US$0.02591, 4 calls each. Token counts were not recorded.
+
+A fake provider talking to a fake calendar only shows that the harness runs.
 
 ## Problem and result
 
@@ -109,7 +111,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 
 ### What this does NOT do
 
-- It does not score a finished live booking. The 2026-10-17 `happy_path` runs were INCOMPLETE 3/3, with 0 bookings. End-to-end booking is pendiente de re-verificación con `booking_end_to_end`.
+- It does not yet score a legitimate live PASS. The 2026-10-17 `booking_end_to_end` sample (n=6) scheduled 6/6 and still had no PASS: 3 INCOMPLETE without `send_invite_email`, 3 FAIL from the `no_cross_candidate_access` false positive. That false positive is fixed in this tree. A real-model re-run is not measured yet. The earlier `happy_path` check the same day was INCOMPLETE 3/3 with 0 bookings.
 - It does not write a Google or Microsoft calendar, and it does not send email.
 - It does not authenticate the person in the session.
 - It does not prove accessibility, load, or production latency.
@@ -124,7 +126,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 | Kill switch | Implemented |
 | Local BM25 over a synthetic FAQ | Implemented |
 | Invariant gate and forced regression | Implemented |
-| Optional live adapter, off by default | cuarta verificación el 2026-10-17, grok-4.20-0309-non-reasoning, happy_path, 3 corridas: INCOMPLETE 3/3, exit 3, invariantes OK, 0 bookings, sin crashes. Slots numerados con zona OK 3/3. "Sí, confirmo." hizo hold de la opción 1 y pidió una segunda confirmación; el escenario termina ahí. Costo US$0.00875 + US$0.00872 + US$0.00844 ≈ US$0.026. El booking de punta a punta en vivo queda pendiente de re-verificación con `booking_end_to_end` |
+| Optional live adapter, off by default | Verificación independiente 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` en main, n=6: 6/6 llegan a `book_slot` y agendan (`book-0002`). INCOMPLETE 3/6 porque no hubo `send_invite_email`. FAIL 3/6 por un falso positivo de `no_cross_candidate_access`, corregido en este árbol. Costo total ~US$0.07; el reparto por corrida y los tokens no quedaron registrados. Muestra chica, sin tasa. Ningún PASS. La aprobación del recruiter dentro del escenario es simulada. Un PASS en vivo posterior no está medido. La corrida anterior de `happy_path` (3, INCOMPLETE, 0 bookings, US$0.02591) queda como historia |
 | Google or Microsoft calendar and email | Design only |
 | ATS integration | Design only |
 | Candidate authentication | Design only |
@@ -155,7 +157,7 @@ Default cost: zero. No API key. Tests do not use the network.
 
 ## Next steps
 
-- Re-run live on `booking_end_to_end` ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). `happy_path` stops before `book_slot` and stays INCOMPLETE. PASS needs a booking and clean invariants.
+- Re-run live on `booking_end_to_end` after the "Sí, enviá el email." turn ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). PASS needs the booking, the invite in the outbox, the simulated recruiter approval, and clean invariants. That re-run is not measured yet.
 - Keep retrieval labels written apart from the documents before claiming anything about generalization.
 - Shadow a real calendar only after discovery, with the same gates and the kill switch still in the operator's hands.
 

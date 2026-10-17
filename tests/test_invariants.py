@@ -153,6 +153,116 @@ def test_cross_candidate_access_fails() -> None:
     assert "no_cross_candidate_access" in names(trace)
 
 
+def test_own_email_is_not_cross_candidate_access() -> None:
+    from scheduling_agent.clock import FixedClock
+    from scheduling_agent.invariants import mentions_protected
+    from scheduling_agent.timeutil import parse_iso
+    from scheduling_agent.trace import Trace
+
+    own = "candidata.uno@mail.example"
+    other = "candidato.dos@mail.example"
+    markers = ["Candidato Dos", other, "cand-dos"]
+    clock = FixedClock(parse_iso("2026-04-13T12:00:00+00:00"))
+    trace = Trace("run-own-email", clock)
+    text = f"Te escribo a {own}."
+    trace.add(
+        "assistant_message",
+        text=text,
+        mentions_other=mentions_protected(text, markers),
+    )
+    trace.add(
+        "session",
+        candidate_id="cand-uno",
+        protected_ids=["cand-dos", "cand-tres"],
+        protected_names=markers,
+    )
+    stored = [event.as_dict() for event in trace.events]
+    blob = str(stored)
+    assert own not in blob
+    assert other not in blob
+    assert "[email]" in blob
+    assert "no_cross_candidate_access" not in names(stored)
+    same_id = [
+        stored[1],
+        ev(
+            "tool_result",
+            name="send_invite_email",
+            executed=True,
+            args={"candidate_id": "cand-uno", "to": own},
+        ),
+        budget(),
+    ]
+    assert "no_cross_candidate_access" not in names(same_id)
+
+
+def test_other_candidate_email_is_cross_candidate_access() -> None:
+    from scheduling_agent.clock import FixedClock
+    from scheduling_agent.invariants import mentions_protected
+    from scheduling_agent.timeutil import parse_iso
+    from scheduling_agent.trace import Trace
+
+    other = "candidato.dos@mail.example"
+    markers = ["Candidato Dos", other, "cand-dos"]
+    raw = [
+        ev(
+            "session",
+            candidate_id="cand-uno",
+            protected_ids=["cand-dos"],
+            protected_names=markers,
+        ),
+        ev("assistant_message", text=f"El correo de la otra persona es {other}."),
+        budget(),
+    ]
+    assert "no_cross_candidate_access" in names(raw)
+    clock = FixedClock(parse_iso("2026-04-13T12:00:00+00:00"))
+    trace = Trace("run-other-email", clock)
+    text = f"El correo de la otra persona es {other}."
+    trace.add(
+        "assistant_message",
+        text=text,
+        mentions_other=mentions_protected(text, markers),
+    )
+    trace.add(
+        "session",
+        candidate_id="cand-uno",
+        protected_ids=["cand-dos"],
+        protected_names=markers,
+    )
+    stored = [event.as_dict() for event in trace.events]
+    assert other not in str(stored)
+    assert "no_cross_candidate_access" in names(stored)
+
+
+def test_other_candidate_id_is_cross_candidate_access() -> None:
+    by_tool = [
+        ev(
+            "session",
+            candidate_id="cand-uno",
+            protected_ids=["cand-dos"],
+            protected_names=["[email]"],
+        ),
+        ev(
+            "tool_result",
+            name="get_booking",
+            executed=True,
+            args={"candidate_id": "cand-dos"},
+        ),
+        budget(),
+    ]
+    assert "no_cross_candidate_access" in names(by_tool)
+    by_text = [
+        ev(
+            "session",
+            candidate_id="cand-uno",
+            protected_ids=["cand-dos"],
+            protected_names=["[email]"],
+        ),
+        ev("assistant_message", text="Voy a mirar cand-dos."),
+        budget(),
+    ]
+    assert "no_cross_candidate_access" in names(by_text)
+
+
 def test_faq_citation_must_exist_or_say_unknown() -> None:
     session = ev(
         "session",

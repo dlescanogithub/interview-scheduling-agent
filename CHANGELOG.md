@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `booking_end_to_end` adds the second explicit yes and the recruiter approval so a live run can finish a booking. `happy_path` stays the two-turn cutoff and is INCOMPLETE without `book_slot`.
 - A short confirmation accepts the pending numbered slot, and that slot is passed back to the model as `pending_slot`.
 - Assistant text that shows a clock time without a zone and an offset is rewritten before the user sees it.
 - Tool argument errors, including a naive datetime or an unknown interviewer id, return a structured tool result instead of crashing the process.

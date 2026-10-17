@@ -16,4 +16,4 @@ If a reply contains a clock time and is missing a zone or a numeric offset, do n
 
 ## Consequences
 
-The scripted proposals use the same line, so a bare yes still matches the slot that was shown. A live run that stays inside the invariants but never books is `INCOMPLETE` and exits 3. Real-model re-verification of this fix is still pending.
+The scripted proposals use the same line, so a bare yes still matches the slot that was shown. A live run that stays inside the invariants but never books is `INCOMPLETE` and exits 3. A fourth live check the same day (`happy_path`, 3 runs) showed numbered slots with a zone in 3/3 and the second-confirmation ask. End-to-end booking is still pendiente de re-verificación con `booking_end_to_end`.

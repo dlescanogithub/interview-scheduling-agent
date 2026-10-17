@@ -493,6 +493,8 @@ class ScriptedProvider:
             if find_in_users(messages, extract_interviewer) is None:
                 return _say(request, _copy(lang, "who"), "clarify")
             if is_yes(text):
+                if _booked_ok(messages):
+                    return _say(request, _copy(lang, "pending"), "pending_approval")
                 if extract_clock(text) and select_slot(messages, text) is None:
                     return _say(request, _copy(lang, "not_that"), "clarify")
                 slot = select_slot(messages, text)
@@ -585,6 +587,16 @@ class ScriptedProvider:
         else:
             ask = "Reply yes to confirm option 1."
         return _say(request, f"{intro}\n{line}\n{ask}", purpose)
+
+
+def _booked_ok(messages: list[dict[str, Any]]) -> bool:
+    """True when this session already converted a hold into a booking."""
+    return any(
+        payload.get("name") == "book_slot"
+        and payload.get("status") == "OK"
+        and payload.get("executed") is True
+        for payload in tool_payloads(messages)
+    )
 
 
 def _lookup_done(messages: list[dict[str, Any]]) -> bool:

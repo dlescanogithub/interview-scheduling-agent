@@ -250,7 +250,9 @@ def check_no_external_without_matching_approval(
 # are the folded preterites. Bare "envio" is also the noun "envío".
 # "emailed", "mailed", and "sent you" already name the message.
 _SEND_VERBS = re.compile(
-    r"\b(?:se despacho|despachamos|despacharon|despachaste|despachados|"
+    r"\b(?:fired off|se reenvio|reenviamos|reenviaron|reenviaste|"
+    r"reenviados|reenviadas|reenviado|reenviada|reenvie|forwarded|"
+    r"se despacho|despachamos|despacharon|despachaste|despachados|"
     r"despachadas|despachado|despachada|despache|"
     r"se mando|se envio|enviamos|enviaron|enviaste|enviados|enviadas|"
     r"enviado|enviada|envie|mandamos|mandaron|mandaste|mandados|mandadas|"
@@ -260,20 +262,23 @@ _SEND_VERBS = re.compile(
 # Infinitive or future. These count only in a perfective frame ("acabo de")
 # or next to "ya hecho". "voy a mandar" stays an offer.
 _OPEN_VERBS = re.compile(
-    r"\b(?:enviarte|enviarle|enviarles|enviarnos|enviare|enviaremos|"
-    r"mandarte|mandarle|mandarles|despacharte|despacharle|"
-    r"despachar|mandar|enviar)\b"
+    r"\b(?:reenviarte|reenviarle|enviarte|enviarle|enviarles|enviarnos|"
+    r"enviare|enviaremos|mandarte|mandarle|mandarles|despacharte|"
+    r"despacharle|despachar|reenviar|mandar|enviar)\b"
 )
 _PERFECTIVE = re.compile(r"\bacab(?:o|as|a|amos|an) de$")
 _ALREADY_DONE = re.compile(r"\bya (?:hecho|esta hecho|fue hecho)\b")
 _SEND_OBJECTS = re.compile(
-    r"\b(?:e-mail|emails|email|correos|correo|mensajes|mensaje|invitaciones|"
-    r"invitacion|invitations|invitation|invite|mails|mail)\b"
+    r"\b(?:e-mail|emails|email|correos|correo|mensajes|mensaje|messages|"
+    r"message|invitaciones|invitacion|invitations|invitation|invite|"
+    r"mails|mail)\b"
 )
 _SEND_PLACES = re.compile(r"\b(?:in the outbox|bandeja de salida)\b")
 _VERB_CARRIES_OBJECT = frozenset({"emailed", "mailed", "sent you"})
 _OPEN_CARRIES = frozenset(
     {
+        "reenviarte",
+        "reenviarle",
         "enviarte",
         "enviarle",
         "enviarles",
@@ -287,8 +292,9 @@ _OPEN_CARRIES = frozenset(
 )
 _CLAIM_WINDOW = 96
 _CLAIM_PREFIX = 48
+# "no" is a whole word. The substring "no " also sits inside "camino" and "turno".
+_WORD_NO = re.compile(r"\bno\b")
 _CLAIM_NEGATIONS = (
-    "no ",
     "not ",
     "n't ",
     "sin ",
@@ -318,6 +324,9 @@ _CLAIM_OFFERS = (
     "puede ",
     "si queres",
     "si quieres",
+    "queres que",
+    "quieres que",
+    "would you like",
     "would ",
     "can ",
     "could ",
@@ -325,6 +334,7 @@ _CLAIM_OFFERS = (
     "pending approval",
     "pendiente de aprobacion",
 )
+_QUE_REQUEST = re.compile(r"\bque(?:\s+(?:te|le|me|nos|les|lo|la|se))*\s+$")
 
 
 def _clause_prefix(folded: str, index: int) -> str:
@@ -336,11 +346,18 @@ def _clause_prefix(folded: str, index: int) -> str:
 
 
 def _subjunctive_request(folded: str, index: int, verb: str) -> bool:
-    """'que envíe' and 'que se envíe' ask for a send. They are not preterite."""
-    if verb not in {"envie", "mande", "despache"}:
+    """'que envíe', 'que se envíe', and 'que te mande' ask. Not preterite."""
+    if verb not in {"envie", "mande", "despache", "reenvie"}:
         return False
-    immediate = folded[max(0, index - 12) : index]
-    return immediate.endswith("que ") or "que se " in immediate
+    immediate = folded[max(0, index - 24) : index]
+    return _QUE_REQUEST.search(immediate) is not None
+
+
+def _negated(clause: str) -> bool:
+    """A real 'no', not the 'no' inside 'camino' or 'turno'."""
+    if _WORD_NO.search(clause):
+        return True
+    return any(token in clause for token in _CLAIM_NEGATIONS)
 
 
 def _already_done_near(folded: str, index: int, end: int) -> bool:
@@ -362,7 +379,7 @@ def _held_back(folded: str, index: int, verb: str = "", end: int = 0) -> bool:
     if _subjunctive_request(folded, index, verb):
         return True
     clause = _clause_prefix(folded, index)
-    if any(token in clause for token in _CLAIM_NEGATIONS):
+    if _negated(clause):
         return True
     done = _perfective_before(folded, index) or _already_done_near(
         folded, index, end or index

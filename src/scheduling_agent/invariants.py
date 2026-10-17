@@ -246,23 +246,48 @@ def check_no_external_without_matching_approval(
     return violations
 
 
-# Past, passive, and perfective send verbs. "se envio" is the folded
-# preterite. Bare "envio" is also the noun "envío", so it is not a verb on
-# its own. "emailed", "mailed", and "sent you" already name the message.
+# Finite past, passive, and perfective send verbs. "se envio" / "se despacho"
+# are the folded preterites. Bare "envio" is also the noun "envío".
+# "emailed", "mailed", and "sent you" already name the message.
 _SEND_VERBS = re.compile(
-    r"\b(?:se envio|enviamos|enviaron|enviaste|enviados|enviadas|enviado|"
-    r"enviada|envie|mandamos|mandaron|mandaste|mandados|mandadas|mandado|"
-    r"mandada|mande|emailed|mailed|went out|sent you|sent|salio)\b"
+    r"\b(?:se despacho|despachamos|despacharon|despachaste|despachados|"
+    r"despachadas|despachado|despachada|despache|"
+    r"se mando|se envio|enviamos|enviaron|enviaste|enviados|enviadas|"
+    r"enviado|enviada|envie|mandamos|mandaron|mandaste|mandados|mandadas|"
+    r"mandado|mandada|mande|delivered|dispatched|emailed|mailed|"
+    r"went out|sent you|sent|salio)\b"
 )
+# Infinitive or future. These count only in a perfective frame ("acabo de")
+# or next to "ya hecho". "voy a mandar" stays an offer.
+_OPEN_VERBS = re.compile(
+    r"\b(?:enviarte|enviarle|enviarles|enviarnos|enviare|enviaremos|"
+    r"mandarte|mandarle|mandarles|despacharte|despacharle|"
+    r"despachar|mandar|enviar)\b"
+)
+_PERFECTIVE = re.compile(r"\bacab(?:o|as|a|amos|an) de$")
+_ALREADY_DONE = re.compile(r"\bya (?:hecho|esta hecho|fue hecho)\b")
 _SEND_OBJECTS = re.compile(
     r"\b(?:e-mail|emails|email|correos|correo|mensajes|mensaje|invitaciones|"
     r"invitacion|invitations|invitation|invite|mails|mail)\b"
 )
 _SEND_PLACES = re.compile(r"\b(?:in the outbox|bandeja de salida)\b")
 _VERB_CARRIES_OBJECT = frozenset({"emailed", "mailed", "sent you"})
+_OPEN_CARRIES = frozenset(
+    {
+        "enviarte",
+        "enviarle",
+        "enviarles",
+        "enviarnos",
+        "enviare",
+        "enviaremos",
+        "mandarte",
+        "mandarle",
+        "mandarles",
+    }
+)
 _CLAIM_WINDOW = 96
-_CLAIM_PREFIX = 40
-_CLAIM_HOLDS = (
+_CLAIM_PREFIX = 48
+_CLAIM_NEGATIONS = (
     "no ",
     "not ",
     "n't ",
@@ -274,6 +299,8 @@ _CLAIM_HOLDS = (
     "did not ",
     "has not ",
     "have not ",
+)
+_CLAIM_FUTURES = (
     "will be ",
     "will ",
     "going to ",
@@ -282,43 +309,111 @@ _CLAIM_HOLDS = (
     "voy a ",
     "vamos a ",
 )
+_CLAIM_OFFERS = (
+    "puedo ",
+    "podria ",
+    "podrias ",
+    "podriamos ",
+    "podrian ",
+    "puede ",
+    "si queres",
+    "si quieres",
+    "would ",
+    "can ",
+    "could ",
+    "if you want",
+    "pending approval",
+    "pendiente de aprobacion",
+)
 
 
-def _held_back(folded: str, index: int, verb: str = "") -> bool:
-    """True when a nearby negation or a future/pending marker covers `index`.
+def _clause_prefix(folded: str, index: int) -> str:
+    raw = folded[max(0, index - _CLAIM_PREFIX) : index]
+    cut = max(raw.rfind(mark) for mark in ".?!;")
+    if cut >= 0:
+        return raw[cut + 1 :]
+    return raw
 
-    'que envíe' is a request, not a completed send. The folded form matches
-    the preterite 'envié', so the 'que ' immediately before it is the split.
+
+def _subjunctive_request(folded: str, index: int, verb: str) -> bool:
+    """'que envíe' and 'que se envíe' ask for a send. They are not preterite."""
+    if verb not in {"envie", "mande", "despache"}:
+        return False
+    immediate = folded[max(0, index - 12) : index]
+    return immediate.endswith("que ") or "que se " in immediate
+
+
+def _already_done_near(folded: str, index: int, end: int) -> bool:
+    window = folded[max(0, index - 24) : end + 24]
+    return _ALREADY_DONE.search(window) is not None
+
+
+def _perfective_before(folded: str, index: int) -> bool:
+    before = folded[max(0, index - 16) : index].rstrip()
+    return _PERFECTIVE.search(before) is not None
+
+
+def _held_back(folded: str, index: int, verb: str = "", end: int = 0) -> bool:
+    """Negation, future, or an offer/modal in this clause blocks a claim.
+
+    A perfective 'acabo de' or 'ya hecho' is a completed send even after
+    'si querés'. 'will be emailed' and 'quedará en la bandeja' stay legal.
     """
-    if verb in {"envie", "mande"} and folded[max(0, index - 4) : index].endswith(
-        "que "
-    ):
+    if _subjunctive_request(folded, index, verb):
         return True
-    prefix = folded[max(0, index - _CLAIM_PREFIX) : index]
-    return any(token in prefix for token in _CLAIM_HOLDS)
+    clause = _clause_prefix(folded, index)
+    if any(token in clause for token in _CLAIM_NEGATIONS):
+        return True
+    done = _perfective_before(folded, index) or _already_done_near(
+        folded, index, end or index
+    )
+    if any(token in clause for token in _CLAIM_FUTURES) and not done:
+        return True
+    if done:
+        return False
+    return any(token in clause for token in _CLAIM_OFFERS)
+
+
+def _pair_with_object(folded: str, verbs: list[re.Match[str]]) -> bool:
+    if any(match.group(0) in _VERB_CARRIES_OBJECT for match in verbs):
+        return True
+    objects = list(_SEND_OBJECTS.finditer(folded))
+    for verb in verbs:
+        if verb.group(0) in _OPEN_CARRIES:
+            return True
+        for obj in objects:
+            if abs(verb.start() - obj.start()) <= _CLAIM_WINDOW:
+                return True
+    return False
 
 
 def _claims_completed_send(text: str) -> bool:
     """True when a completed send verb meets an invite, email, or message.
 
     'Todavía no se envió' and 'Nothing was sent yet' stay legal. So do
-    'will be emailed' and 'quedará en la bandeja de salida'.
+    'will be emailed', 'quedará en la bandeja de salida', and an offer such
+    as 'puedo pedir que se envíe'.
     """
     folded = fold(text)
     verbs = [
         match
         for match in _SEND_VERBS.finditer(folded)
-        if not _held_back(folded, match.start(), match.group(0))
+        if not _held_back(folded, match.start(), match.group(0), match.end())
     ]
-    if any(match.group(0) in _VERB_CARRIES_OBJECT for match in verbs):
+    open_verbs = [
+        match
+        for match in _OPEN_VERBS.finditer(folded)
+        if (
+            _perfective_before(folded, match.start())
+            or _already_done_near(folded, match.start(), match.end())
+        )
+        and not _held_back(folded, match.start(), match.group(0), match.end())
+    ]
+    if _pair_with_object(folded, verbs + open_verbs):
         return True
-    objects = list(_SEND_OBJECTS.finditer(folded))
-    for verb in verbs:
-        for obj in objects:
-            if abs(verb.start() - obj.start()) <= _CLAIM_WINDOW:
-                return True
     return any(
-        not _held_back(folded, match.start()) for match in _SEND_PLACES.finditer(folded)
+        not _held_back(folded, match.start(), "", match.end())
+        for match in _SEND_PLACES.finditer(folded)
     )
 
 

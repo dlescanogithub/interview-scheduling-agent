@@ -31,6 +31,8 @@ Exit code 1. `no_external_without_matching_approval` failed 24 scenarios and pas
 
 Re-measured 2026-10-17, commit `b9c04708ea72816ebd63cb37f8c7b3b0f2f71408`, after `booking_end_to_end` joined the suite: eval 26/26, 0 violations. Regression exit 1, 52 violations (`book_preceded_by_user_confirmation` failed 26, `no_external_without_matching_approval` failed 25 and passed the kill switch, `safe_state_after_rejection` failed 1). Mean turns to booking 2.25. Handoff rate 0.08 (2 of 26).
 
+Re-measured 2026-10-17, commit `87eb459a88846f58b85cf0f93520afb1fbae4d52`: `python3 -m pytest` 108 passed, coverage 91.07%. Eval still 26/26, 0 violations. Regression still exit 1, 52 violations. `no_cross_candidate_access` stayed 26 pass / 0 fail on that regression.
+
 Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=6 (small sample, not a rate): 6/6 reached `book_slot` and scheduled, booking id `book-0002`. 3/6 INCOMPLETE with no `send_invite_email`. 3/6 FAIL on a `no_cross_candidate_access` false positive, corrected in this tree and not re-measured live. Total cost about US$0.07. Per-run cost and token counts were not recorded. No legitimate PASS. The recruiter approval inside the scenario is simulated. A later live PASS is not measured yet. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
 
 Earlier the same day, `happy_path`, 3 runs: INCOMPLETE 3/3, 0 bookings, invariants passed, exit 3. Cost US$0.00875 + US$0.00872 + US$0.00844 = US$0.02591. Token counts were not recorded.

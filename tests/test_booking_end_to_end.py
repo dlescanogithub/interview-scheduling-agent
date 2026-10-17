@@ -11,6 +11,7 @@ import pytest
 
 from scheduling_agent.cli import main
 from scheduling_agent.dialogue import format_slot_line
+from scheduling_agent.retrieval import fold
 
 LIST_ARGS = {
     "interviewer_id": "iv-ana",
@@ -75,9 +76,10 @@ def _ok(payloads: list[dict[str, Any]], name: str) -> dict[str, Any] | None:
 
 
 class FlowTransport:
-    """Canned live model. The first yes holds. The exact yes books."""
+    """Canned live model. The exact yes books. The email yes sends."""
 
     book = True
+    send = True
 
     def __init__(self) -> None:
         self.bodies: list[dict[str, Any]] = []
@@ -163,6 +165,15 @@ class FlowTransport:
                 },
                 "call-book",
             )
+        asked = any("envia el email" in fold(text) for text in users)
+        if not asked or not FlowTransport.send:
+            if not asked:
+                return _text(
+                    "Quedó reservado.\n"
+                    + lines[0]
+                    + "\n¿Querés que envíe el correo? Todavía no lo envié."
+                )
+            return _text("No envié el correo.")
         sent = _ok(payloads, "send_invite_email")
         pending = any(
             payload.get("name") == "send_invite_email"
@@ -251,6 +262,7 @@ def test_live_end_to_end_books_only_after_the_exact_yes(
 ) -> None:
     _live_env(monkeypatch)
     FlowTransport.book = True
+    FlowTransport.send = True
     code = main(["live", "--scenario", "booking_end_to_end", "--max-turns", "12"])
     out = capsys.readouterr().out
     assert code == 0
@@ -271,7 +283,9 @@ def test_live_end_to_end_books_only_after_the_exact_yes(
     assert sends[-1]["executed"] is True
     exact_at = out.index("Sí, confirmo ese horario exacto.")
     book_line = out.index('"name": "book_slot"')
-    assert exact_at < book_line
+    send_ask = out.index("Sí, enviá el email.")
+    assert exact_at < book_line < send_ask
+    assert send_ask < out.index('"name": "send_invite_email"')
     sent_at = next(
         index
         for index, payload in enumerate(tools)
@@ -286,6 +300,7 @@ def test_live_end_to_end_without_a_booking_is_incomplete(
 ) -> None:
     _live_env(monkeypatch)
     FlowTransport.book = False
+    FlowTransport.send = True
     code = main(["live", "--scenario", "booking_end_to_end", "--max-turns", "12"])
     out = capsys.readouterr().out
     assert code == 3
@@ -304,6 +319,7 @@ def test_happy_path_live_still_incomplete_without_the_second_yes(
 ) -> None:
     _live_env(monkeypatch)
     FlowTransport.book = True
+    FlowTransport.send = True
     code = main(["live", "--scenario", "happy_path", "--max-turns", "12"])
     out = capsys.readouterr().out
     assert code == 3
@@ -315,3 +331,41 @@ def test_happy_path_live_still_incomplete_without_the_second_yes(
         not (payload.get("name") == "book_slot" and payload.get("executed") is True)
         for payload in _tools(out)
     )
+
+
+def test_live_end_to_end_without_send_invite_is_incomplete(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _live_env(monkeypatch)
+    FlowTransport.book = True
+    FlowTransport.send = False
+    code = main(["live", "--scenario", "booking_end_to_end", "--max-turns", "12"])
+    out = capsys.readouterr().out
+    assert code == 3
+    assert "invariants_passed=true" in out
+    assert "task_completed=false" in out
+    assert "live result: INCOMPLETE" in out
+    assert "live result: PASS" not in out
+    tools = _tools(out)
+    assert any(
+        payload.get("name") == "book_slot" and payload.get("executed") is True
+        for payload in tools
+    )
+    assert all(payload.get("name") != "send_invite_email" for payload in tools)
+
+
+def test_simulated_approval_without_outbox_is_incomplete(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _live_env(monkeypatch)
+    FlowTransport.book = True
+    FlowTransport.send = False
+    code = main(["live", "--scenario", "booking_end_to_end", "--max-turns", "12"])
+    out = capsys.readouterr().out
+    assert code == 3
+    assert "Sí, enviá el email." in out
+    assert "approval_decision" not in out
+    assert "live result: INCOMPLETE" in out
+    assert "live result: PASS" not in out
+    assert "task_completed=false" in out
+    assert all(payload.get("name") != "send_invite_email" for payload in _tools(out))

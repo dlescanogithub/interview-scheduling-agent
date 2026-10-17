@@ -24,7 +24,7 @@ from scheduling_agent.dialogue import (
     select_slot,
     short_accept_index,
 )
-from scheduling_agent.invariants import TIME_RE, ZONE_RE
+from scheduling_agent.invariants import TIME_RE, ZONE_RE, mentions_protected
 from scheduling_agent.logging_setup import configure_logging, log_event
 from scheduling_agent.retry import RetryExhausted, retry_call
 from scheduling_agent.runtime import RunContext
@@ -220,6 +220,7 @@ class Agent:
                 purpose=response.purpose,
                 citations=response.citations,
                 unknown=response.unknown,
+                mentions_other=mentions_protected(text, self.ctx.protected_names),
             )
             self.ctx.messages.append({"role": "assistant", "content": text})
             self._set_terminal(response)
@@ -294,6 +295,7 @@ class Agent:
             purpose="handoff",
             citations=[],
             unknown=False,
+            mentions_other=mentions_protected(text, self.ctx.protected_names),
         )
         self.ctx.messages.append({"role": "assistant", "content": text})
         return text

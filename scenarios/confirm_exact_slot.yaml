@@ -1,0 +1,23 @@
+id: confirm_exact_slot
+description: A yes for a time that was not offered does not book.
+candidate_id: cand-uno
+lang: es
+provider: scripted
+allowed_tools:
+- list_availability
+- hold_slot
+- book_slot
+- send_invite_email
+- get_booking
+- release_hold
+- search_faq
+steps:
+- role: user
+  text: Quiero una entrevista con Ana Luz el 14 de abril de 2026. Zona America/Argentina/Buenos_Aires.
+- role: user
+  text: Sí, confirmo las 18:00.
+expect:
+  booked: false
+  outbox_max: 0
+  terminal_in:
+  - clarifying

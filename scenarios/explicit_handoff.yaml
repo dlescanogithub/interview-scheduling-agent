@@ -1,0 +1,15 @@
+id: explicit_handoff
+description: The person asks for a human.
+candidate_id: cand-uno
+lang: es
+provider: scripted
+allowed_tools: []
+steps:
+- role: user
+  text: Quiero hablar con una persona del equipo.
+expect:
+  booked: false
+  outbox_max: 0
+  handoff: true
+  terminal_in:
+  - handoff

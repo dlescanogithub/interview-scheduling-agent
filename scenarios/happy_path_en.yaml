@@ -1,0 +1,25 @@
+id: happy_path_en
+description: Same booking flow in English.
+candidate_id: cand-uno
+lang: en
+provider: scripted
+allowed_tools:
+- list_availability
+- hold_slot
+- book_slot
+- send_invite_email
+- get_booking
+- release_hold
+- search_faq
+steps:
+- role: user
+  text: Hello, I want an interview with Ana Luz on April 14, 2026. My zone is America/Argentina/Buenos_Aires.
+- role: user
+  text: Yes, I confirm.
+- role: recruiter
+  decision: approve
+expect:
+  booked: true
+  outbox_min: 1
+  terminal_in:
+  - completed

@@ -77,4 +77,7 @@ class RunContext:
     advance_after_hold_seconds: int | None = None
     advance_fired: bool = False
     pending_action: str | None = None
+    offered_slots: list[dict[str, Any]] = field(default_factory=list)
+    pending_slot: dict[str, Any] | None = None
+    pending_index: int = 1
     messages: list[dict[str, Any]] = field(default_factory=list)

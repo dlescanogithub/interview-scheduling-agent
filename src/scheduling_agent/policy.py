@@ -48,6 +48,7 @@ from scheduling_agent.dialogue import (
     select_slot,
     tool_payloads,
     user_texts,
+    zone_phrase,
 )
 from scheduling_agent.roster import INTERVIEWERS, other_markers
 
@@ -613,11 +614,13 @@ def _last_output(messages: list[dict[str, Any]], name: str) -> dict[str, Any] | 
 
 
 def _intro_miss(lang: str, clock: str, zone: str) -> str:
+    label = zone_phrase(zone)
     if lang == "es":
         return (
-            f"El horario {clock} {zone} no está libre. Puedo ofrecerte estas opciones."
+            f"El horario {clock} ({label}) no está libre. "
+            "Puedo ofrecerte estas opciones."
         )
-    return f"The time {clock} {zone} is not free. I can offer these options."
+    return f"The time {clock} ({label}) is not free. I can offer these options."
 
 
 def _ask_tuesday(lang: str, first: str, second: str) -> str:

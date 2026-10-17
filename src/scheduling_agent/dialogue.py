@@ -27,6 +27,33 @@ from scheduling_agent.timeutil import (
 _LINE = re.compile(
     r"^(\d+)\)\s+\S+\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})-(\d{2}:\d{2})\s+(\S+)"
 )
+_SLOT_LINE = re.compile(
+    r"^(\d+)\)\s+\S+\s+(\d{2})/(\d{2})\s+(\d{2}:\d{2})\s+\(([^)]+)\)"
+)
+_SHORT_ACCEPT = re.compile(
+    r"^(?:(?:la|el|opcion|option)\s+([123])"
+    r"|(?:ese|esa|ese horario|that one|that slot))\.?$"
+)
+_SHORT_ES = {
+    "lunes": "lun",
+    "martes": "mar",
+    "miércoles": "mie",
+    "miercoles": "mie",
+    "jueves": "jue",
+    "viernes": "vie",
+    "sábado": "sab",
+    "sabado": "sab",
+    "domingo": "dom",
+}
+_SHORT_EN = {
+    "Monday": "Mon",
+    "Tuesday": "Tue",
+    "Wednesday": "Wed",
+    "Thursday": "Thu",
+    "Friday": "Fri",
+    "Saturday": "Sat",
+    "Sunday": "Sun",
+}
 _ZONE = re.compile(r"(?:America|Europe)(?:/[A-Za-z0-9_+-]+)+|\bUTC\b")
 _CLOCK = re.compile(r"\b(\d{1,2}:\d{2})\b")
 _YES = re.compile(r"\b(si|yes|confirmo|confirm|dale)\b")
@@ -401,6 +428,23 @@ def option_index(text: str) -> int | None:
     return int(match.group(1))
 
 
+def short_accept_index(text: str) -> int | None:
+    """1-based option, or 0 when a bare yes accepts the pending slot.
+
+    ``None`` means this turn is not a short confirmation. A longer sentence
+    such as "mejor la opción 2" stays on the restate path.
+    """
+    if is_refusal(text):
+        return None
+    match = _SHORT_ACCEPT.match(fold(text).strip())
+    if match is not None:
+        raw = match.group(1)
+        return int(raw) if raw else 0
+    if is_yes(text):
+        return 0
+    return None
+
+
 def confirm_index(text: str) -> int | None:
     match = _CONFIRM_OPT.search(fold(text))
     if match is None:
@@ -417,12 +461,29 @@ def last_assistant_text(messages: list[dict[str, Any]]) -> str:
 
 
 def parse_option_lines(text: str) -> list[tuple[int, str, str, str]]:
+    """Return `(index, date, start, zone_or_phrase)` per slot line.
+
+    The date field is `YYYY-MM-DD` for the old line and `DD/MM` for
+    `1) mar 14/04 15:00 (ART, UTC-3)`.
+    """
     found: list[tuple[int, str, str, str]] = []
     for line in text.splitlines():
-        match = _LINE.match(line.strip())
-        if match:
+        stripped = line.strip()
+        current = _SLOT_LINE.match(stripped)
+        if current:
             found.append(
-                (int(match.group(1)), match.group(2), match.group(3), match.group(5))
+                (
+                    int(current.group(1)),
+                    f"{current.group(2)}/{current.group(3)}",
+                    current.group(4),
+                    current.group(5),
+                )
+            )
+            continue
+        older = _LINE.match(stripped)
+        if older:
+            found.append(
+                (int(older.group(1)), older.group(2), older.group(3), older.group(5))
             )
     return found
 
@@ -437,15 +498,30 @@ def latest_slots(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return slots
 
 
+def zone_phrase(tz: str) -> str:
+    """One display form: short name and a numeric offset.
+
+    Buenos Aires is UTC-3 all year. UTC slots use `UTC, UTC+0`.
+    """
+    if tz == "America/Argentina/Buenos_Aires":
+        return "ART, UTC-3"
+    if tz == "UTC":
+        return "UTC, UTC+0"
+    return tz
+
+
 def match_slot(
     slots: list[dict[str, Any]], date_text: str, start: str, zone: str
 ) -> dict[str, Any] | None:
     for slot in slots:
-        if (
-            slot.get("local_date") == date_text
-            and slot.get("local_start") == start
-            and slot.get("interviewer_tz") == zone
-        ):
+        local_date = str(slot.get("local_date") or "")
+        phrase = zone_phrase(str(slot.get("interviewer_tz") or ""))
+        day_month = ""
+        if len(local_date) == 10:
+            day_month = f"{local_date[8:10]}/{local_date[5:7]}"
+        date_ok = local_date == date_text or day_month == date_text
+        zone_ok = slot.get("interviewer_tz") == zone or phrase == zone
+        if date_ok and slot.get("local_start") == start and zone_ok:
             return slot
     return None
 
@@ -475,24 +551,34 @@ def select_slot(
 
 
 def format_slot_line(index: int, slot: dict[str, Any], lang: str) -> str:
-    weekday = str(slot["weekday_es"] if lang == "es" else slot["weekday_en"])
-    line = (
-        f"{index}) {weekday} {slot['local_date']} "
-        f"{slot['local_start']}-{slot['local_end']} {slot['interviewer_tz']} | "
-        f"{slot['interviewer_name']} | {slot['duration_minutes']} min"
-    )
+    """Numbered slot. The clock always carries a zone and an offset."""
+    names = _SHORT_ES if lang == "es" else _SHORT_EN
+    weekday_key = str(slot["weekday_es"] if lang == "es" else slot["weekday_en"])
+    weekday = names.get(weekday_key, weekday_key[:3])
+    local_date = str(slot["local_date"])
+    day_month = f"{local_date[8:10]}/{local_date[5:7]}"
+    phrase = zone_phrase(str(slot["interviewer_tz"]))
+    line = f"{index}) {weekday} {day_month} {slot['local_start']} ({phrase})"
+    line += f" | {slot['interviewer_name']} | {slot['duration_minutes']} min"
     if slot.get("candidate_tz") != slot.get("interviewer_tz"):
+        other = zone_phrase(str(slot["candidate_tz"]))
         if lang == "es":
-            line += (
-                f" | candidato {slot['candidate_start']}-{slot['candidate_end']} "
-                f"{slot['candidate_tz']}"
-            )
+            line += f" | candidato {slot['candidate_start']} ({other})"
         else:
-            line += (
-                f" | candidate {slot['candidate_start']}-{slot['candidate_end']} "
-                f"{slot['candidate_tz']}"
-            )
+            line += f" | candidate {slot['candidate_start']} ({other})"
     return line
+
+
+def render_pending_slot(slot: dict[str, Any] | None, index: int = 1) -> str:
+    """One context line. `pending_slot: none` when nothing is waiting."""
+    if slot is None:
+        return "pending_slot: none"
+    label = format_slot_line(index, slot, "es").split(" | ", 1)[0]
+    return (
+        "pending_slot: "
+        f"interviewer_id={slot['interviewer_id']} "
+        f"start={slot['start']} end={slot['end']} label={label}"
+    )
 
 
 def proposal_text(

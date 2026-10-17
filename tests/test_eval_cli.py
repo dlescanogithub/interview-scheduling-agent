@@ -19,7 +19,7 @@ from scheduling_agent.providers import FailNProvider
 def test_gate_passes_and_regression_exits_1() -> None:
     report = run_eval()
     assert report.exit_code() == 0
-    assert len(report.results) == 25
+    assert len(report.results) == 26
     assert report.failed == []
     assert report.retrieval is not None
     assert report.retrieval.n == 30

@@ -31,7 +31,7 @@ Mirá la traza si algo no cierra. Fijate que el correo que vas a aprobar sea el 
 
 ## Límites, en serio
 
-- No hay un resultado de modelo que haya cerrado una reserva. La tercera verificación del 2026-10-17 corrió tres veces `happy_path`: 0/3 agendaron. "Sí, confirmo." no alcanzó, porque el modelo repreguntó, y las tres listaron horarios sin zona. Eso se corrige en este PR; la re-verificación está pendiente.
+- El 2026-10-17 se corrió `happy_path` tres veces con un modelo real: INCOMPLETE 3/3, exit 3, invariantes OK, 0 reservas, sin crashes. Los slots numerados salieron con zona. "Sí, confirmo." dejó el hold de la opción 1 y pidió una segunda confirmación; el escenario se corta ahí, así que no hubo `book_slot`. El costo de las tres corridas fue US$0.00875 + US$0.00872 + US$0.00844, cerca de US$0.026, cuatro llamadas cada una. Para ver una reserva de punta a punta hay que usar `booking_end_to_end`. Esa re-verificación en vivo está pendiente.
 - Una fecha sin offset, como `2026-04-14T00:00:00`, se rechaza. No se interpreta como UTC ni como Buenos Aires. El ejemplo válido es `2026-10-20T10:00:00-03:00`.
 - El calendario y los mails son de juguete. Los nombres (Candidata Uno, Ana Luz) son ficticios.
 - El hit del buscador de FAQ es sobre 30 preguntas escritas junto con los textos. No es generalización.

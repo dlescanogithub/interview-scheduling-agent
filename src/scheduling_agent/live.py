@@ -176,12 +176,47 @@ class LiveProvider:
             tool_calls=calls,
             tokens_in=tokens_in,
             tokens_out=max(tokens_out, 1),
-            purpose="talk",
+            purpose="talk" if calls else _live_purpose(request.messages),
         )
 
     def _next_id(self) -> str:
         self._n += 1
         return f"live-{self._n:04d}"
+
+
+_EXTERNAL_TOOLS = {
+    "send_invite_email",
+    "send_reschedule_email",
+    "send_cancellation_notice",
+}
+
+
+def _live_purpose(messages: list[dict[str, Any]]) -> str:
+    """A live model cannot set purpose. The latest external tool result does.
+
+    A finished invite is `completed`. A send still waiting on the recruiter is
+    `pending_approval`. Reads, holds, and bookings leave the turn as talk.
+    """
+    for message in reversed(messages):
+        if str(message.get("role") or "") != "tool":
+            continue
+        try:
+            loaded = json.loads(str(message.get("content") or ""))
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(loaded, dict):
+            continue
+        name = str(loaded.get("name") or "")
+        status = str(loaded.get("status") or "")
+        if status == "PENDING_APPROVAL":
+            return "pending_approval"
+        if (
+            name in _EXTERNAL_TOOLS
+            and status == "OK"
+            and loaded.get("executed") is True
+        ):
+            return "completed"
+    return "talk"
 
 
 def _openai_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:

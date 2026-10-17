@@ -1,8 +1,8 @@
 # interview-scheduling-agent
 
-The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Real-model results: none yet.
+The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Live on 2026-10-17, grok-4.20-0309-non-reasoning, `happy_path`, 3 runs: exit 3, invariants_passed=true, task_completed=false, INCOMPLETE 3/3, 0 bookings, no crashes. Numbered slots with a zone were fine in 3/3. "Sí, confirmo." stored pending_slot, held option 1, and asked for a second explicit confirmation; the scenario ended, so book_slot never ran. Cost US$0.00875 + US$0.00872 + US$0.00844 = US$0.02591 (about US$0.026), 4 calls each. End-to-end booking is pendiente de re-verificación con el escenario `booking_end_to_end`.
 
-Measured with real providers: none yet. A fake provider talking to a fake calendar only shows that the harness runs.
+Measured with a real provider on that date: those three incomplete runs and that cost. A fake provider talking to a fake calendar only shows that the harness runs. Token counts for those calls were not recorded.
 
 ## Problem and result
 
@@ -107,7 +107,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 
 ### What this does NOT do
 
-- It does not score a real model. Real-model results: none yet.
+- It does not score a finished live booking. The 2026-10-17 `happy_path` runs were INCOMPLETE 3/3, with 0 bookings. End-to-end booking is pendiente de re-verificación con `booking_end_to_end`.
 - It does not write a Google or Microsoft calendar, and it does not send email.
 - It does not authenticate the person in the session.
 - It does not prove accessibility, load, or production latency.
@@ -122,7 +122,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 | Kill switch | Implemented |
 | Local BM25 over a synthetic FAQ | Implemented |
 | Invariant gate and forced regression | Implemented |
-| Optional live adapter, off by default | tercera verificación el 2026-10-17, 3 corridas happy_path: 0/3 agendaron. "Sí, confirmo." no cerró el slot (el modelo repreguntó) y las 3 violaron times_include_timezone por horarios sin zona. Corregido en este PR; re-verificación pendiente |
+| Optional live adapter, off by default | cuarta verificación el 2026-10-17, grok-4.20-0309-non-reasoning, happy_path, 3 corridas: INCOMPLETE 3/3, exit 3, invariantes OK, 0 bookings, sin crashes. Slots numerados con zona OK 3/3. "Sí, confirmo." hizo hold de la opción 1 y pidió una segunda confirmación; el escenario termina ahí. Costo US$0.00875 + US$0.00872 + US$0.00844 ≈ US$0.026. El booking de punta a punta en vivo queda pendiente de re-verificación con `booking_end_to_end` |
 | Google or Microsoft calendar and email | Design only |
 | ATS integration | Design only |
 | Candidate authentication | Design only |
@@ -147,13 +147,13 @@ Default cost: zero. No API key. Tests do not use the network.
 | `make eval-regression` | `python3 -m scheduling_agent eval --regression` |
 | `make secretscan` | `python3 -m scheduling_agent.secretscan` |
 | `make demo` | `python3 -m scheduling_agent demo` |
-| `make live` | `python3 -m scheduling_agent live --scenario happy_path --max-turns 12` |
+| `make live` | `python3 -m scheduling_agent live --scenario booking_end_to_end --max-turns 12` |
 
 `make eval-regression` is expected to exit 1. That exit code is the check.
 
 ## Next steps
 
-- Record a live run in [docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md) and judge it only by the invariants.
+- Re-run live on `booking_end_to_end` ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). `happy_path` stops before `book_slot` and stays INCOMPLETE. PASS needs a booking and clean invariants.
 - Keep retrieval labels written apart from the documents before claiming anything about generalization.
 - Shadow a real calendar only after discovery, with the same gates and the kill switch still in the operator's hands.
 

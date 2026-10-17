@@ -31,4 +31,4 @@ demo:
 	$(PYTHON) -m $(PKG) demo
 
 live:
-	$(PYTHON) -m $(PKG) live --scenario happy_path --max-turns 12
+	$(PYTHON) -m $(PKG) live --scenario booking_end_to_end --max-turns 12

@@ -29,4 +29,6 @@ python3 -m scheduling_agent eval --regression
 
 Exit code 1. `no_external_without_matching_approval` failed 24 scenarios and passed 1 (the kill switch does not send). `book_preceded_by_user_confirmation` failed 25. Violations: 50.
 
+Re-measured 2026-10-17, commit `b9c04708ea72816ebd63cb37f8c7b3b0f2f71408`, after `booking_end_to_end` joined the suite: eval 26/26, 0 violations. Regression exit 1, 52 violations (`book_preceded_by_user_confirmation` failed 26, `no_external_without_matching_approval` failed 25 and passed the kill switch, `safe_state_after_rejection` failed 1). Mean turns to booking 2.25. Handoff rate 0.08 (2 of 26).
+
 Real-provider metrics, 2026-10-17, grok-4.20-0309-non-reasoning, `happy_path`, 3 runs: INCOMPLETE 3/3, 0 bookings, invariants passed, exit 3. Cost US$0.00875 + US$0.00872 + US$0.00844 = US$0.02591. Token counts were not recorded. End-to-end booking is pendiente de re-verificación con `booking_end_to_end`. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).

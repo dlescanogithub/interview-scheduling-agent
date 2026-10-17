@@ -50,7 +50,9 @@ Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `b684187e418dc0bd230117841
 
 Re-measured 2026-10-17, same package and Python, commit `f94f39c63951ddddbdfc2992ef0e0f375160c034`, after the live tool-error tests. `python3 -m pytest` : 93 passed, coverage 90.85%. `python3 -m scheduling_agent eval`: 25/25, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 50 violations. `python3 -m ruff check .`, `python3 -m ruff format --check .`, and `python3 -m mypy` passed. Secret scan: no findings.
 
-Simulated users (the 25 scripted scenarios, not people): mean turns to booking 2.27, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 25). Clarifications are counted only on runs that book, and the clarify purpose is used on runs that do not book.
+Re-measured 2026-10-17, same package and Python, commit `b9c04708ea72816ebd63cb37f8c7b3b0f2f71408`, after adding `booking_end_to_end`. `python3 -m pytest`: 103 passed, coverage 91.04%. `python3 -m scheduling_agent eval`: 26/26, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 52 violations. `python3 -m ruff check .`, `python3 -m ruff format --check .`, and `python3 -m mypy` passed. Secret scan: no findings. Simulated users on that run: mean turns to booking 2.25, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 26).
+
+Simulated users on the 25-scenario measurement above (not people): mean turns to booking 2.27, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 25). Clarifications are counted only on runs that book, and the clarify purpose is used on runs that do not book.
 
 Retrieval, 30 queries whose labels were written together with the corpus: hit@1 30/30, hit@3 30/30. The bootstrap 95% interval is [1.000, 1.000] because every item is a hit. Resampling this list is not a model comparison and is not evidence of generalization.
 

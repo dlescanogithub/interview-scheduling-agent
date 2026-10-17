@@ -1,0 +1,80 @@
+organization: Taller Aurora
+now: "2026-04-13T12:00:00+00:00"
+interviewers:
+  - id: iv-ana
+    name: Ana Luz
+    email: ana.luz@taller-aurora.example
+    timezone: America/Argentina/Buenos_Aires
+    slot_minutes: 45
+    buffer_minutes: 15
+    working_hours:
+      "0": ["09:00", "17:00"]
+      "1": ["09:00", "17:00"]
+      "2": ["09:00", "17:00"]
+      "3": ["09:00", "17:00"]
+      "4": ["09:00", "17:00"]
+    busy:
+      - start: "2026-04-14T13:00:00-03:00"
+        end: "2026-04-14T14:00:00-03:00"
+        reason: equipo
+  - id: iv-bruno
+    name: Bruno Paz
+    email: bruno.paz@taller-aurora.example
+    timezone: America/Argentina/Buenos_Aires
+    slot_minutes: 45
+    buffer_minutes: 15
+    working_hours:
+      "0": ["09:00", "17:00"]
+      "1": ["09:00", "17:00"]
+      "2": ["09:00", "17:00"]
+      "3": ["09:00", "17:00"]
+      "4": ["09:00", "17:00"]
+    busy:
+      - start: "2026-04-16T09:00:00-03:00"
+        end: "2026-04-16T11:00:00-03:00"
+        reason: taller
+  - id: iv-camila
+    name: Camila Norte
+    email: camila.norte@taller-aurora.example
+    timezone: UTC
+    slot_minutes: 45
+    buffer_minutes: 15
+    working_hours:
+      "0": ["09:00", "17:00"]
+      "1": ["09:00", "17:00"]
+      "2": ["09:00", "17:00"]
+      "3": ["09:00", "17:00"]
+      "4": ["09:00", "17:00"]
+    busy:
+      - start: "2026-04-14T14:00:00+00:00"
+        end: "2026-04-14T15:00:00+00:00"
+        reason: foco
+  - id: iv-elena
+    name: Elena Sur
+    email: elena.sur@taller-aurora.example
+    timezone: UTC
+    slot_minutes: 45
+    buffer_minutes: 15
+    working_hours:
+      "0": ["09:00", "17:00"]
+      "1": ["09:00", "17:00"]
+      "2": ["09:00", "17:00"]
+      "3": ["09:00", "17:00"]
+      "4": ["09:00", "17:00"]
+    busy:
+      - start: "2026-04-15T12:00:00+00:00"
+        end: "2026-04-15T13:00:00+00:00"
+        reason: clinica interna
+candidates:
+  - id: cand-uno
+    name: Candidata Uno
+    email: candidata.uno@mail.example
+    timezone: America/Argentina/Buenos_Aires
+  - id: cand-dos
+    name: Candidato Dos
+    email: candidato.dos@mail.example
+    timezone: UTC
+  - id: cand-tres
+    name: Candidata Tres
+    email: candidata.tres@mail.example
+    timezone: America/New_York

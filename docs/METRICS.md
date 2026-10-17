@@ -33,6 +33,8 @@ Re-measured 2026-10-17, commit `b9c04708ea72816ebd63cb37f8c7b3b0f2f71408`, after
 
 Re-measured 2026-10-17, commit `87eb459a88846f58b85cf0f93520afb1fbae4d52`: `python3 -m pytest` 108 passed, coverage 91.07%. Eval still 26/26, 0 violations. Regression still exit 1, 52 violations. `no_cross_candidate_access` stayed 26 pass / 0 fail on that regression.
 
+Re-measured 2026-10-17, commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550`, Python 3.12.3. `python3 -m pytest`: 114 passed, coverage 90.60%. `python3 -m scheduling_agent eval`: 26/26, 12 invariants, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 54 violations (`no_send_claim_without_outbox` failed `kill_switch` twice; 25 approval, 26 confirmation, 1 safe-state). Mean turns to booking 2.25. Handoff rate 0.08 (2 of 26).
+
 Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=8 (small sample, not a rate): measured 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 `no_cross_candidate_access` false positives. The model booked `book-0002`, called `send_invite_email`, stayed `PENDING_APPROVAL`, and did not retry after the simulated approval, so outbox=0. Round-set cost about US$0.15. Per-run cost and token counts were not recorded. Real PASS after the runtime executes the approved call: not measured yet. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
 
 Earlier the same day, n=6 on the same scenario: 6/6 booked, 3/6 INCOMPLETE with no `send_invite_email`, 3/6 FAIL on the cross-candidate false positive. Total cost about US$0.07.

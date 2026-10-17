@@ -1,0 +1,29 @@
+id: long_rambling
+description: A long note still yields one booking question path.
+candidate_id: cand-uno
+lang: es
+provider: scripted
+allowed_tools:
+- list_availability
+- hold_slot
+- book_slot
+- send_invite_email
+- get_booking
+- release_hold
+- search_faq
+steps:
+- role: user
+  text: 'Hola, perdón el mensaje largo. Estuve pensando en el viaje, en el cuaderno,
+    en el café de la esquina y en cómo ordenar la semana. También en el ambiente de
+    una sala tranquila, sin apuro. Al final la idea es simple: quiero una entrevista
+    con Bruno Paz el 16 de abril de 2026 a la mañana. Mi zona es UTC. Gracias por
+    leer.'
+- role: user
+  text: Sí, confirmo.
+- role: recruiter
+  decision: approve
+expect:
+  booked: true
+  outbox_min: 1
+  terminal_in:
+  - completed

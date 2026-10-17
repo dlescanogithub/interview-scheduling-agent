@@ -1,0 +1,32 @@
+id: reschedule
+description: Move an existing booking after a yes, then send a reschedule notice.
+candidate_id: cand-uno
+lang: es
+provider: scripted
+allowed_tools:
+- get_booking
+- list_availability
+- hold_slot
+- book_slot
+- cancel_booking
+- send_reschedule_email
+- release_hold
+- search_faq
+fixture_bookings:
+- id: book-existing
+  interviewer_id: iv-ana
+  candidate_id: cand-uno
+  start: '2026-04-15T13:00:00-03:00'
+  end: '2026-04-15T13:45:00-03:00'
+steps:
+- role: user
+  text: Necesito reprogramar mi entrevista con Ana Luz. Zona America/Argentina/Buenos_Aires.
+- role: user
+  text: Sí, confirmo.
+- role: recruiter
+  decision: approve
+expect:
+  booked: true
+  outbox_min: 1
+  terminal_in:
+  - completed

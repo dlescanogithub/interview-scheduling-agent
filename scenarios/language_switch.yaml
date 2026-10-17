@@ -1,0 +1,25 @@
+id: language_switch
+description: The conversation switches from Spanish to English.
+candidate_id: cand-uno
+lang: es
+provider: scripted
+allowed_tools:
+- list_availability
+- hold_slot
+- book_slot
+- send_invite_email
+- get_booking
+- release_hold
+- search_faq
+steps:
+- role: user
+  text: Hola. Quiero una entrevista con Ana Luz el 14 de abril de 2026. Zona America/Argentina/Buenos_Aires.
+- role: user
+  text: Yes, I confirm option 1.
+- role: recruiter
+  decision: approve
+expect:
+  booked: true
+  outbox_min: 1
+  terminal_in:
+  - completed

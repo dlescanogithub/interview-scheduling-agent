@@ -1,0 +1,29 @@
+id: cancel
+description: Cancel after an explicit yes and a recruiter-approved notice.
+candidate_id: cand-uno
+lang: es
+provider: scripted
+allowed_tools:
+- get_booking
+- cancel_booking
+- send_cancellation_notice
+- search_faq
+- list_availability
+fixture_bookings:
+- id: book-existing
+  interviewer_id: iv-ana
+  candidate_id: cand-uno
+  start: '2026-04-15T13:00:00-03:00'
+  end: '2026-04-15T13:45:00-03:00'
+steps:
+- role: user
+  text: Cancelá mi entrevista, por favor.
+- role: user
+  text: Sí, confirmo.
+- role: recruiter
+  decision: approve
+expect:
+  booked: false
+  outbox_min: 1
+  terminal_in:
+  - completed

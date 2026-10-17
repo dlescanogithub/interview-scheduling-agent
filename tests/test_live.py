@@ -272,5 +272,5 @@ def test_chat_url_and_bad_payloads(tmp_path: Path) -> None:
         }
     )
     provider = LiveProvider(_settings(), bad_args, SpendLedger(tmp_path / "d.jsonl"))
-    with pytest.raises(ProviderError):
-        provider.complete(_request("a"))
+    parsed = provider.complete(_request("a"))
+    assert parsed.tool_calls[0].parse_error == "invalid_json"

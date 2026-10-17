@@ -48,6 +48,8 @@ Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `b684187e418dc0bd230117841
 | Types | mypy, 25 files, no issues | `python3 -m mypy src` |
 | Secret scan | no findings | `python3 -m scheduling_agent.secretscan` |
 
+Re-measured 2026-10-17, same package and Python, commit `f94f39c63951ddddbdfc2992ef0e0f375160c034`, after the live tool-error tests. `python3 -m pytest` : 93 passed, coverage 90.85%. `python3 -m scheduling_agent eval`: 25/25, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 50 violations. `python3 -m ruff check .`, `python3 -m ruff format --check .`, and `python3 -m mypy` passed. Secret scan: no findings.
+
 Simulated users (the 25 scripted scenarios, not people): mean turns to booking 2.27, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 25). Clarifications are counted only on runs that book, and the clarify purpose is used on runs that do not book.
 
 Retrieval, 30 queries whose labels were written together with the corpus: hit@1 30/30, hit@3 30/30. The bootstrap 95% interval is [1.000, 1.000] because every item is a hit. Resampling this list is not a model comparison and is not evidence of generalization.
@@ -98,6 +100,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 - [0003 Two confirmations](docs/adr/0003-two-confirmations.md)
 - [0004 Local BM25](docs/adr/0004-local-bm25.md)
 - [0005 Effect classes, kill switch, and cancel](docs/adr/0005-effect-classes-and-kill-switch.md)
+- [0006 Reject naive datetimes](docs/adr/0006-reject-naive-datetimes.md)
 
 ## Security and known limits
 
@@ -118,7 +121,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 | Kill switch | Implemented |
 | Local BM25 over a synthetic FAQ | Implemented |
 | Invariant gate and forced regression | Implemented |
-| Optional live adapter, off by default | Implemented, not executed against a network |
+| Optional live adapter, off by default | ejecutado 3 veces el 2026-10-17: 2 crashes (corregidos en este PR), 1 corrida sin booking; re-verificación pendiente |
 | Google or Microsoft calendar and email | Design only |
 | ATS integration | Design only |
 | Candidate authentication | Design only |

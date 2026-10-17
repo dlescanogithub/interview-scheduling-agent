@@ -41,7 +41,12 @@ MONTHS_ES = {
 
 
 def parse_iso(value: str) -> datetime:
-    """Parse an aware ISO-8601 instant and return it in UTC."""
+    """Parse an aware ISO-8601 instant and return it in UTC.
+
+    Naive datetimes are rejected. They are not treated as UTC and not treated
+    as America/Argentina/Buenos_Aires. A model-facing caller must catch this
+    and answer with an offset, for example 2026-10-20T10:00:00-03:00.
+    """
     raw = value.strip()
     if raw.endswith("Z"):
         raw = raw[:-1] + "+00:00"
@@ -49,6 +54,17 @@ def parse_iso(value: str) -> datetime:
     if parsed.tzinfo is None:
         raise ValueError(f"naive datetime: {value}")
     return parsed.astimezone(UTC)
+
+
+def format_zoned(value: datetime, zone: str) -> str:
+    """Local ISO-8601 with a numeric offset, such as 2026-04-13T09:00:00-03:00."""
+    if value.tzinfo is None:
+        raise ValueError("naive datetime")
+    local = value.astimezone(ZoneInfo(zone))
+    raw = local.strftime("%z")
+    if len(raw) == 5:
+        raw = f"{raw[:3]}:{raw[3:]}"
+    return local.strftime("%Y-%m-%dT%H:%M:%S") + raw
 
 
 def to_canonical(value: datetime) -> str:

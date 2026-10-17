@@ -31,7 +31,8 @@ Mirá la traza si algo no cierra. Fijate que el correo que vas a aprobar sea el 
 
 ## Límites, en serio
 
-- No hay resultados con un modelo real. Medido con proveedores reales: ninguno todavía.
+- No hay un resultado de modelo que haya cerrado una reserva. El 2026-10-17 se llamó a un modelo tres veces: dos corridas se cayeron por una fecha sin zona y una terminó sin reservar. Eso se corrige en el código; la re-verificación está pendiente.
+- Una fecha sin offset, como `2026-04-14T00:00:00`, se rechaza. No se interpreta como UTC ni como Buenos Aires. El ejemplo válido es `2026-10-20T10:00:00-03:00`.
 - El calendario y los mails son de juguete. Los nombres (Candidata Uno, Ana Luz) son ficticios.
 - El hit del buscador de FAQ es sobre 30 preguntas escritas junto con los textos. No es generalización.
 - Dockerfile está en el repo. No se construyó en CI.

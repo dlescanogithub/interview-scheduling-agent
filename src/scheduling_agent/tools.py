@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from scheduling_agent.approvals import param_hash, slot_hash
 from scheduling_agent.calendar import CalendarError
 from scheduling_agent.logging_setup import configure_logging, log_event
+from scheduling_agent.roster import INTERVIEWERS
 from scheduling_agent.runtime import OutboxMessage, RunContext
 from scheduling_agent.timeutil import (
     WEEKDAYS_EN,
@@ -23,6 +24,12 @@ READ = "read"
 INTERNAL = "internal_reversible"
 EXTERNAL = "external"
 EFFECT_RANK = {READ: 0, INTERNAL: 1, EXTERNAL: 2}
+
+# Naive values are rejected on purpose. Do not guess UTC or Buenos Aires.
+NAIVE_DATETIME_FIX = (
+    "datetime debe incluir offset, ej. 2026-10-20T10:00:00-03:00. "
+    "Naive datetimes are rejected; they are not read as UTC or as Buenos Aires."
+)
 
 _OBJECT = "object"
 _STRING = "string"
@@ -217,6 +224,73 @@ def validate_args(name: str, args: dict[str, Any]) -> str | None:
             if isinstance(maximum, int) and value > maximum:
                 return f"{key} above maximum"
     return None
+
+
+def how_to_fix(status: str, detail: str) -> str:
+    """Tell the caller what to change. The text is safe to show to a model."""
+    folded = detail.lower()
+    if "naive datetime" in folded or "invalid iso" in folded:
+        return NAIVE_DATETIME_FIX
+    if status == "NOT_FOUND" and "interviewer" in folded:
+        roster = ", ".join(
+            f"{item_id} ({row['name']})" for item_id, row in INTERVIEWERS.items()
+        )
+        return (
+            "Use an exact interviewer id from the roster: "
+            f"{roster}. A display name or a slug such as ana-luz is not an id."
+        )
+    if status == "TOOL_ERROR" and "json" in folded:
+        return "Arguments must be one JSON object. " + NAIVE_DATETIME_FIX
+    return (
+        "Correct the arguments and call the tool again. "
+        "Do not repeat the same invalid call. " + NAIVE_DATETIME_FIX
+    )
+
+
+def _failure(
+    ctx: RunContext,
+    *,
+    name: str,
+    effect_class: str,
+    args: dict[str, Any],
+    origin: str,
+    status: str,
+    detail: str,
+    error: str,
+) -> dict[str, Any]:
+    """A tool problem the model can read. It is not an uncaught exception."""
+    return _result(
+        ctx,
+        name=name,
+        effect_class=effect_class,
+        args=args,
+        origin=origin,
+        status=status,
+        executed=False,
+        output={
+            "error": error,
+            "detail": detail,
+            "how_to_fix": how_to_fix(status, detail),
+        },
+    )
+
+
+def invalid_arguments_result(
+    ctx: RunContext,
+    name: str,
+    origin: str,
+) -> dict[str, Any]:
+    """The model sent tool arguments that were not a JSON object."""
+    return _failure(
+        ctx,
+        name=name or "unknown",
+        effect_class=READ,
+        args={},
+        origin=origin,
+        status="TOOL_ERROR",
+        detail="tool arguments were not valid JSON",
+        error="invalid_json",
+    )
 
 
 def _result(
@@ -425,15 +499,28 @@ def execute_tool(
     try:
         return _dispatch(ctx, name, effect, args, origin)
     except CalendarError as exc:
-        return _result(
+        return _failure(
             ctx,
             name=name,
             effect_class=effect,
             args=args,
             origin=origin,
             status=exc.code,
-            executed=False,
-            output={"detail": exc.detail},
+            detail=exc.detail,
+            error=exc.code.lower(),
+        )
+    except (ValueError, TypeError, KeyError) as exc:
+        detail = str(exc) or exc.__class__.__name__
+        error = "naive_datetime" if "naive datetime" in detail.lower() else "tool_error"
+        return _failure(
+            ctx,
+            name=name,
+            effect_class=effect,
+            args=args,
+            origin=origin,
+            status="TOOL_ERROR",
+            detail=detail,
+            error=error,
         )
 
 

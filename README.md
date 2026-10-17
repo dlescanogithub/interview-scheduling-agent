@@ -37,7 +37,7 @@ flowchart LR
 
 ## Results
 
-Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `b684187e418dc0bd230117841ff8f6b4a6559fd2`, Python 3.12.3, from the repo root. CI runs the same commands on Python 3.11 and 3.12.
+Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `b684187e418dc0bd230117841ff8f6b4a6559fd2`, Python 3.12.3, from the repo root. CI runs the same commands on Python 3.11 and 3.12. A later commit that only edits docs does not change these counts; re-run the commands to confirm.
 
 | Check | Result | Command |
 | --- | --- | --- |

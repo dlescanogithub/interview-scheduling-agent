@@ -35,7 +35,11 @@ Re-measured 2026-10-17, commit `87eb459a88846f58b85cf0f93520afb1fbae4d52`: `pyth
 
 Re-measured 2026-10-17, commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550`, Python 3.12.3. `python3 -m pytest`: 114 passed, coverage 90.60%. `python3 -m scheduling_agent eval`: 26/26, 12 invariants, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 54 violations (`no_send_claim_without_outbox` failed `kill_switch` twice; 25 approval, 26 confirmation, 1 safe-state). Mean turns to booking 2.25. Handoff rate 0.08 (2 of 26).
 
-Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=8 (small sample, not a rate): measured 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 `no_cross_candidate_access` false positives. The model booked `book-0002`, called `send_invite_email`, stayed `PENDING_APPROVAL`, and did not retry after the simulated approval, so outbox=0. Round-set cost about US$0.15. Per-run cost and token counts were not recorded. Real PASS after the runtime executes the approved call: not measured yet. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
+Re-measured 2026-10-17, commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453`, Python 3.12.3. `python3 -m pytest`: 116 passed, coverage 90.68%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations.
+
+Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, n=5 (one model, small sample, not a rate): measured 5/5 PASS with a simulated approval (outbox=1, origin=approval, same param_hash). That does not prove the model retries the tool: the runtime executes the approved call. Round cost about US$0.11. Per-run cost and token counts were not recorded. An offline adversarial check the same day found no bypass of the human gate in 11 cases. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
+
+Earlier the same day, n=8 on main before that runtime change: 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 `no_cross_candidate_access` false positives, outbox=0. Round-set cost about US$0.15.
 
 Earlier the same day, n=6 on the same scenario: 6/6 booked, 3/6 INCOMPLETE with no `send_invite_email`, 3/6 FAIL on the cross-candidate false positive. Total cost about US$0.07.
 

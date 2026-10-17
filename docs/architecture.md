@@ -22,7 +22,9 @@ flowchart TD
   trace --> invariants[Invariant checks]
 ```
 
-The provider proposes tool calls. The gateway decides which of them run. EagerProvider plus `bypass_gates` is only the regression path: it is supposed to violate the confirmation and approval invariants. The kill switch still applies on that path.
+The provider proposes tool calls. The gateway decides which of them run. A bad tool argument, including a naive datetime or an interviewer id that is not on the roster, comes back as a tool result with `how_to_fix`. It does not escape as an uncaught exception. Naive datetimes are rejected; they are not read as UTC or as Buenos Aires. See ADR 0006.
+
+`python -m scheduling_agent live` prints `invariants_passed` and `task_completed` separately. The line `live result: PASS` is used only when both are true. A clean trace that did not finish the scenario's booking is `INCOMPLETE` and exits 3. EagerProvider plus `bypass_gates` is only the regression path: it is supposed to violate the confirmation and approval invariants. The kill switch still applies on that path.
 
 Time is a `FixedClock` in the lab (default instant `2026-04-13T12:00:00+00:00`). `WallClock` is used only to stamp a live ledger row and refuses `advance`.
 

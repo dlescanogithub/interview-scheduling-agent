@@ -16,7 +16,12 @@ from scheduling_agent.config import (
 from scheduling_agent.evalgate import render_report, run_eval
 from scheduling_agent.live import LiveProvider, SpendLedger, UrllibTransport
 from scheduling_agent.logging_setup import redact
-from scheduling_agent.runner import find_root, load_scenarios, run_scenario
+from scheduling_agent.runner import (
+    ScenarioResult,
+    find_root,
+    load_scenarios,
+    run_scenario,
+)
 from scheduling_agent.secretscan import main as secretscan_main
 
 
@@ -97,12 +102,39 @@ def cmd_live(scenario_id: str, max_turns: int) -> int:
     provider = LiveProvider(settings, UrllibTransport(), ledger)
     result = run_scenario(matches[0], root=root, settings=settings, provider=provider)
     sys.stdout.write(_transcript(result.messages, result.trace))
-    print(f"live invariants: {'PASS' if not result.violations else 'FAIL'}")
     for violation in result.violations:
         print(f"- {violation.name}: {violation.detail}")
     last_status = ledger.rows[-1]["cost_status"] if ledger.rows else "none"
     print(f"ledger_rows={len(ledger.rows)} cost_status_last={last_status}")
-    return 0 if not result.violations else 1
+    print(render_live_result(result), end="")
+    return live_outcome(result)[1]
+
+
+def live_outcome(result: ScenarioResult) -> tuple[str, int]:
+    """Separate a clean invariant trace from a finished booking.
+
+    PASS is only both. A trace with no violations and no booking is INCOMPLETE,
+    not PASS. FAIL means an invariant broke or a tool outside the allow-list ran.
+    """
+    invariants_passed = not result.violations and result.allowed_ok
+    task_completed = not result.expect_failures
+    if not invariants_passed:
+        return "FAIL", 1
+    if not task_completed:
+        return "INCOMPLETE", 3
+    return "PASS", 0
+
+
+def render_live_result(result: ScenarioResult) -> str:
+    """Text the live command prints. The word PASS appears only for a real PASS."""
+    label, _code = live_outcome(result)
+    invariants_passed = not result.violations and result.allowed_ok
+    task_completed = not result.expect_failures
+    return (
+        f"invariants_passed={str(invariants_passed).lower()}\n"
+        f"task_completed={str(task_completed).lower()}\n"
+        f"live result: {label}\n"
+    )
 
 
 def _interactive() -> int:

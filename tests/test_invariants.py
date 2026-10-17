@@ -315,6 +315,7 @@ def test_send_claim_forms_that_used_to_slip_now_fail() -> None:
         "El correo fue enviado.",
         "Te enviamos la invitación.",
         "I sent you the invite.",
+        "I sent you.",
         "The invitation went out.",
     )
     for text in missed:
@@ -334,6 +335,8 @@ def test_pending_and_future_send_wording_is_not_a_claim() -> None:
         "Todavía no se envió.",
         "Nothing was sent yet.",
         "so no invitation went out.",
+        "¿Querés que envíe el correo? Todavía no lo envié.",
+        "No envié el correo.",
     )
     for text in pending:
         trace = [ev("assistant_message", text=text), budget()]

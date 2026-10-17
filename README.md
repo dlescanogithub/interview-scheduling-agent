@@ -1,6 +1,6 @@
 # interview-scheduling-agent
 
-The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Independent live check on 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, n=5 (one model, a small sample, not a rate): measured 5/5 PASS with a simulated approval (outbox=1, `origin=approval`, same `param_hash`). That sample does not prove the model retries the tool: the runtime executes the approved call. Cost of that round about US$0.11. Per-run amounts, call counts, and token counts were not recorded. An offline adversarial check the same day found no bypass of the human gate in 11 cases. In production the recruiter approval has to arrive on an authenticated channel. This repo does not implement that channel; the approval here is simulated. PASS still requires `task_completed=true`: the booking, an invite in the outbox, the approval, and clean invariants. Earlier the same day, before that runtime change, n=8: 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 false positives of `no_cross_candidate_access`, outbox=0, about US$0.15.
+The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Independent live check on 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, one model. First sample n=5: 5/5 PASS with a simulated approval (outbox=1, `origin=approval`, same `param_hash`), about US$0.11. Three more runs the same day: PASS 3/3, US$0.054. Together that is 8/8 PASS with a simulated approval, n=8, a small sample, not a rate. It does not prove the model retries the tool: the runtime executes the approved call. Per-run splits, call counts, and token counts were not recorded. An offline adversarial check the same day found no bypass of the human gate in 11 cases. In production the recruiter approval has to arrive on an authenticated channel. This repo does not implement that channel; the approval here is simulated. PASS still requires `task_completed=true`: the booking, an invite in the outbox, the approval, and clean invariants. Earlier the same day, before that runtime change, a different n=8: 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 false positives of `no_cross_candidate_access`, outbox=0, about US$0.15.
 
 An earlier sample the same day, same scenario, n=6, did book and had 3 INCOMPLETE without `send_invite_email` plus 3 FAIL from the cross-candidate false positive (about US$0.07 total). That false positive is fixed; the n=8 sample shows 0 of those FAILs. `happy_path` the same day was INCOMPLETE 3/3 with 0 bookings (US$0.02591).
 
@@ -41,18 +41,18 @@ flowchart LR
 
 ## Results
 
-Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453`, Python 3.12.3, from the repo root. CI runs the same commands on Python 3.11 and 3.12. A later commit that only edits docs does not change these counts; re-run the commands to confirm.
+Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `bcfd136d8dbbbcdcb9597e96601eee8563c7d620`, Python 3.12.3, from the repo root, with `LIVE_LLM=1` and a fake key exported to confirm the suite does not call a provider. CI runs the same commands on Python 3.11 and 3.12. A later commit that only edits docs does not change these counts; re-run the commands to confirm.
 
 | Check | Result | Command |
 | --- | --- | --- |
 | Eval gate | 26/26 pass, 12 invariants, 0 violations | `python3 -m scheduling_agent eval` |
 | Forced regression | exit 1, 54 violations | `python3 -m scheduling_agent eval --regression` |
-| Tests | 116 passed, coverage 90.68% | `python3 -m pytest` |
+| Tests | 118 passed, coverage 90.65% | `python3 -m pytest` |
 | Lint | ruff check and format check passed | `python3 -m ruff check .` |
 | Types | mypy, 25 files, no issues | `python3 -m mypy src` |
 | Secret scan | no findings | `python3 -m scheduling_agent.secretscan` |
 
-`no_send_claim_without_outbox` is the twelfth invariant. On the regression it passed 25 scenarios and failed 1 (`kill_switch`, two claim lines, outbox empty). That is why the violation count is 54: 25 approval, 2 send-claim, 26 confirmation, 1 safe-state. Simulated users on that run: mean turns to booking 2.25, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 26). The previous measurement, commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550`, was 114 passed, coverage 90.60%, with the same eval and regression counts.
+`no_send_claim_without_outbox` is the twelfth invariant. On the regression it passed 25 scenarios and failed 1 (`kill_switch`, two claim lines, outbox empty). That is why the violation count is 54: 25 approval, 2 send-claim, 26 confirmation, 1 safe-state. Simulated users on that run: mean turns to booking 2.25, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 26). The previous measurement, commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453`, was 116 passed, coverage 90.68%, with the same eval and regression counts. Commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550` was 114 passed, coverage 90.60%.
 
 Re-measured 2026-10-17, same package and Python, commit `f94f39c63951ddddbdfc2992ef0e0f375160c034`, after the live tool-error tests. `python3 -m pytest` : 93 passed, coverage 90.85%. `python3 -m scheduling_agent eval`: 25/25, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 50 violations. `python3 -m ruff check .`, `python3 -m ruff format --check .`, and `python3 -m mypy` passed. Secret scan: no findings.
 
@@ -117,7 +117,8 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 
 ### What this does NOT do
 
-- A live PASS on 2026-10-17, `booking_end_to_end`, n=5, one model: 5/5 PASS with a simulated approval (outbox=1, `origin=approval`, same `param_hash`). That does not prove the model retries the tool, because the runtime executes the approved call. It is a small sample, not a rate. In production the approval has to arrive on an authenticated channel. This repo does not implement that channel. `no_cross_candidate_access` still misses an obfuscated address, an address with spaces, and a first name alone. An offline check that day detected 6/6 direct leaks and passed 3 clean controls (small n). `no_send_claim_without_outbox`, offline the same day with an empty outbox, before this pattern change: 9/14 send-claim forms caught, false positives 2/9 on pending future wording. Recall after the pattern change: not measured yet.
+- A live PASS on 2026-10-17, `booking_end_to_end`, one model: n=5 at about US$0.11 plus 3 more runs at US$0.054, together 8/8 PASS with a simulated approval. Small sample, not a rate. That does not prove the model retries the tool, because the runtime executes the approved call. In production the approval has to arrive on an authenticated channel. This repo does not implement that channel. `no_cross_candidate_access` still misses an obfuscated address, an address with spaces, and a first name alone. An offline check that day detected 6/6 direct leaks and passed 3 clean controls (small n). `no_send_claim_without_outbox` on fresh forms, empty outbox, before the verb-and-object detector: 2/14 caught, 0/9 false positives, n=14, small. Recall after that detector: not measured yet.
+- The test suite clears `LIVE_LLM`, `LLM_*`, `XAI_API_KEY`, and `MAX_LIVE_SPEND_USD`, and a socket guard fails the run if a test opens a connection. Demo and eval stay on the scripted provider.
 - It does not write a Google or Microsoft calendar, and it does not send email.
 - It does not authenticate the person in the session.
 - It does not prove accessibility, load, or production latency.
@@ -132,7 +133,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 | Kill switch | Implemented |
 | Local BM25 over a synthetic FAQ | Implemented |
 | Invariant gate and forced regression | Implemented |
-| Optional live adapter, off by default | 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, n=5, one model: measured 5/5 PASS with a simulated approval (outbox=1, `origin=approval`, same `param_hash`). Small sample, not a rate. Does not prove the model retries the tool: the runtime executes the approved call. Round cost about US$0.11. Production approval has to use an authenticated channel; this repo does not implement it |
+| Optional live adapter, off by default | 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, one model: n=5 PASS (about US$0.11) plus 3 more PASS (US$0.054) = 8/8 PASS with a simulated approval. Small sample, not a rate. Does not prove the model retries the tool: the runtime executes the approved call. Production approval has to use an authenticated channel; this repo does not implement it |
 | Google or Microsoft calendar and email | Design only |
 | ATS integration | Design only |
 | Candidate authentication | Design only |
@@ -163,7 +164,7 @@ Default cost: zero. No API key. Tests do not use the network.
 
 ## Next steps
 
-- A larger live sample, and the send-claim recall after the pattern change, are not measured yet ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). The n=5 PASS used a simulated approval. Production still needs an authenticated recruiter channel, which this repo does not implement.
+- A larger live sample than the 8/8 simulated-approval PASS, and the send-claim recall after the verb-and-object detector, are not measured yet ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). Production still needs an authenticated recruiter channel, which this repo does not implement.
 - Keep retrieval labels written apart from the documents before claiming anything about generalization.
 - Shadow a real calendar only after discovery, with the same gates and the kill switch still in the operator's hands.
 

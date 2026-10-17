@@ -37,6 +37,8 @@ Re-measured 2026-10-17, commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550`, Pytho
 
 Re-measured 2026-10-17, commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453`, Python 3.12.3. `python3 -m pytest`: 116 passed, coverage 90.68%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations.
 
+Re-measured 2026-10-17, commit `cc5c233ea771e218f4bb2f28c2df503889db0917`, Python 3.12.3, with `LIVE_LLM=1` exported and a non-routable base URL. `python3 -m pytest`: 122 passed, coverage 90.79%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations. The suite did not open a socket.
+
 Re-measured 2026-10-17, commit `a9b21e5388fafdaaf0b4fa3dd5f5c440ecaf9948`, Python 3.12.3, with `LIVE_LLM=1` exported and a non-routable base URL. `python3 -m pytest`: 120 passed, coverage 90.77%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations. The suite did not open a socket.
 
 Re-measured 2026-10-17, commit `bcfd136d8dbbbcdcb9597e96601eee8563c7d620`, Python 3.12.3, with `LIVE_LLM=1` exported and a non-routable base URL. `python3 -m pytest`: 118 passed, coverage 90.65%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations. The suite did not open a socket. External verification of that same HEAD (VERIFY_REPORT_9, Python 3.12.15) also got 118 passed, 90.65%, and 0 calls to api.x.ai with `LIVE_LLM=1` and a fake key. The previous commit `4d512df` with that environment failed 2 tests and made 6 calls to api.x.ai.

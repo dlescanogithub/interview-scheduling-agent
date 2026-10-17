@@ -41,18 +41,18 @@ flowchart LR
 
 ## Results
 
-Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `bcfd136d8dbbbcdcb9597e96601eee8563c7d620`, Python 3.12.3, from the repo root, with `LIVE_LLM=1` and a fake key exported to confirm the suite does not call a provider. CI runs the same commands on Python 3.11 and 3.12. A later commit that only edits docs does not change these counts; re-run the commands to confirm.
+Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `a9b21e5388fafdaaf0b4fa3dd5f5c440ecaf9948`, Python 3.12.3, from the repo root, with `LIVE_LLM=1` and a fake key exported to confirm the suite does not call a provider. CI runs the same commands on Python 3.11 and 3.12. A later commit that only edits docs does not change these counts; re-run the commands to confirm.
 
 | Check | Result | Command |
 | --- | --- | --- |
 | Eval gate | 26/26 pass, 12 invariants, 0 violations | `python3 -m scheduling_agent eval` |
 | Forced regression | exit 1, 54 violations | `python3 -m scheduling_agent eval --regression` |
-| Tests | 118 passed, coverage 90.65% | `python3 -m pytest` |
+| Tests | 120 passed, coverage 90.77% | `python3 -m pytest` |
 | Lint | ruff check and format check passed | `python3 -m ruff check .` |
 | Types | mypy, 25 files, no issues | `python3 -m mypy src` |
 | Secret scan | no findings | `python3 -m scheduling_agent.secretscan` |
 
-`no_send_claim_without_outbox` is the twelfth invariant. On the regression it passed 25 scenarios and failed 1 (`kill_switch`, two claim lines, outbox empty). That is why the violation count is 54: 25 approval, 2 send-claim, 26 confirmation, 1 safe-state. Simulated users on that run: mean turns to booking 2.25, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 26). The previous measurement, commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453`, was 116 passed, coverage 90.68%, with the same eval and regression counts. Commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550` was 114 passed, coverage 90.60%.
+`no_send_claim_without_outbox` is the twelfth invariant. On the regression it passed 25 scenarios and failed 1 (`kill_switch`, two claim lines, outbox empty). That is why the violation count is 54: 25 approval, 2 send-claim, 26 confirmation, 1 safe-state. Simulated users on that run: mean turns to booking 2.25, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 26). The previous measurement, commit `bcfd136d8dbbbcdcb9597e96601eee8563c7d620`, was 118 passed, coverage 90.65%, with the same eval and regression counts. Commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453` was 116 passed, coverage 90.68%. Commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550` was 114 passed, coverage 90.60%.
 
 Re-measured 2026-10-17, same package and Python, commit `f94f39c63951ddddbdfc2992ef0e0f375160c034`, after the live tool-error tests. `python3 -m pytest` : 93 passed, coverage 90.85%. `python3 -m scheduling_agent eval`: 25/25, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 50 violations. `python3 -m ruff check .`, `python3 -m ruff format --check .`, and `python3 -m mypy` passed. Secret scan: no findings.
 

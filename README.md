@@ -1,6 +1,8 @@
 # interview-scheduling-agent
 
-The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Independent live check on 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=6 (a small sample, not a rate): 6/6 reached `book_slot` and scheduled, booking id `book-0002`. 3/6 were INCOMPLETE because the model never called `send_invite_email` and asked whether to send; the script ended there. 3/6 FAILed on a false positive in `no_cross_candidate_access`: the trace redacts every address to `[email]`, and the other candidates' addresses were redacted too, so naming the session candidate's own address matched. Total cost about US$0.07. Per-run amounts and token counts were not recorded. None of the six was a legitimate PASS. The recruiter step in `booking_end_to_end` is a simulated approval written into the scenario. PASS still requires `task_completed=true`: the booking, an invite in the outbox, that approval, and clean invariants. A PASS on a real model after the email turn is not measured yet.
+The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Independent live check on 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=8 (a small sample, not a rate): measured 0/8 PASS (8/8 INCOMPLETE), 0 FAIL, 0 false positives of `no_cross_candidate_access`. The model booked `book-0002`, called `send_invite_email`, and left it `PENDING_APPROVAL`. The simulated recruiter approval was applied and the model did not retry the send, so outbox=0. Cost of that round's set about US$0.15. Per-run amounts, call counts, and token counts were not recorded. PASS still requires `task_completed=true`: the booking, an invite in the outbox, the approval, and clean invariants. Real PASS after the runtime executes the approved call: not measured yet.
+
+An earlier sample the same day, same scenario, n=6, did book and had 3 INCOMPLETE without `send_invite_email` plus 3 FAIL from the cross-candidate false positive (about US$0.07 total). That false positive is fixed; the n=8 sample shows 0 of those FAILs. `happy_path` the same day was INCOMPLETE 3/3 with 0 bookings (US$0.02591).
 
 An earlier check the same day, `happy_path`, 3 runs: INCOMPLETE 3/3, exit 3, 0 bookings. The scenario ended on the first "Sí, confirmo.", so `book_slot` never ran. Cost US$0.00875 + US$0.00872 + US$0.00844 = US$0.02591, 4 calls each. Token counts were not recorded.
 
@@ -39,16 +41,18 @@ flowchart LR
 
 ## Results
 
-Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `b684187e418dc0bd230117841ff8f6b4a6559fd2`, Python 3.12.3, from the repo root. CI runs the same commands on Python 3.11 and 3.12. A later commit that only edits docs does not change these counts; re-run the commands to confirm.
+Measured 2026-10-17, `scheduling_agent` 0.1.0, commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550`, Python 3.12.3, from the repo root. CI runs the same commands on Python 3.11 and 3.12. A later commit that only edits docs does not change these counts; re-run the commands to confirm.
 
 | Check | Result | Command |
 | --- | --- | --- |
-| Eval gate | 25/25 pass, 11 invariants, 0 violations | `python3 -m scheduling_agent eval` |
-| Forced regression | exit 1, 50 violations | `python3 -m scheduling_agent eval --regression` |
-| Tests | 86 passed, coverage 90.37% | `python3 -m pytest` |
+| Eval gate | 26/26 pass, 12 invariants, 0 violations | `python3 -m scheduling_agent eval` |
+| Forced regression | exit 1, 54 violations | `python3 -m scheduling_agent eval --regression` |
+| Tests | 114 passed, coverage 90.60% | `python3 -m pytest` |
 | Lint | ruff check and format check passed | `python3 -m ruff check .` |
 | Types | mypy, 25 files, no issues | `python3 -m mypy src` |
 | Secret scan | no findings | `python3 -m scheduling_agent.secretscan` |
+
+`no_send_claim_without_outbox` is the twelfth invariant. On the regression it passed 25 scenarios and failed 1 (`kill_switch`, two claim lines, outbox empty). That is why the violation count is 54: 25 approval, 2 send-claim, 26 confirmation, 1 safe-state. Simulated users on that run: mean turns to booking 2.25, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 26).
 
 Re-measured 2026-10-17, same package and Python, commit `f94f39c63951ddddbdfc2992ef0e0f375160c034`, after the live tool-error tests. `python3 -m pytest` : 93 passed, coverage 90.85%. `python3 -m scheduling_agent eval`: 25/25, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 50 violations. `python3 -m ruff check .`, `python3 -m ruff format --check .`, and `python3 -m mypy` passed. Secret scan: no findings.
 
@@ -56,7 +60,7 @@ Re-measured 2026-10-17, same package and Python, commit `b9c04708ea72816ebd63cb3
 
 Re-measured 2026-10-17, same package and Python, commit `87eb459a88846f58b85cf0f93520afb1fbae4d52`, after the invite turn and the cross-candidate fix. `python3 -m pytest`: 108 passed, coverage 91.07%. `python3 -m scheduling_agent eval`: 26/26, 0 violations. `python3 -m scheduling_agent eval --regression`: exit 1, 52 violations. `python3 -m ruff check .`, `python3 -m ruff format --check .`, and `python3 -m mypy` passed. Secret scan: no findings.
 
-Simulated users on the 25-scenario measurement above (not people): mean turns to booking 2.27, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 25). Clarifications are counted only on runs that book, and the clarify purpose is used on runs that do not book.
+Earlier the same day, commit `b684187e418dc0bd230117841ff8f6b4a6559fd2`: eval 25/25, 11 invariants, 0 violations; regression exit 1, 50 violations; `python3 -m pytest` 86 passed, coverage 90.37%. Simulated users on that 25-scenario measurement (not people): mean turns to booking 2.27, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 25). Clarifications are counted only on runs that book, and the clarify purpose is used on runs that do not book.
 
 Retrieval, 30 queries whose labels were written together with the corpus: hit@1 30/30, hit@3 30/30. The bootstrap 95% interval is [1.000, 1.000] because every item is a hit. Resampling this list is not a model comparison and is not evidence of generalization.
 
@@ -113,7 +117,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 
 ### What this does NOT do
 
-- It does not yet score a legitimate live PASS. The 2026-10-17 `booking_end_to_end` sample (n=6) scheduled 6/6 and still had no PASS: 3 INCOMPLETE without `send_invite_email`, 3 FAIL from the `no_cross_candidate_access` false positive. That false positive is fixed in this tree. A real-model re-run is not measured yet. The earlier `happy_path` check the same day was INCOMPLETE 3/3 with 0 bookings.
+- It does not yet have a measured live PASS. On 2026-10-17, `booking_end_to_end`, n=8: 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL. Cause: after `PENDING_APPROVAL` the model did not retry the send, so outbox=0. Real PASS after this tree executes the approved call: not measured yet. `no_cross_candidate_access` still misses an obfuscated address, an address with spaces, and a first name alone. An offline check that day detected 6/6 direct leaks and passed 3 clean controls (small n).
 - It does not write a Google or Microsoft calendar, and it does not send email.
 - It does not authenticate the person in the session.
 - It does not prove accessibility, load, or production latency.
@@ -128,7 +132,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 | Kill switch | Implemented |
 | Local BM25 over a synthetic FAQ | Implemented |
 | Invariant gate and forced regression | Implemented |
-| Optional live adapter, off by default | Verificación independiente 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` en main, n=6: 6/6 llegan a `book_slot` y agendan (`book-0002`). INCOMPLETE 3/6 porque no hubo `send_invite_email`. FAIL 3/6 por un falso positivo de `no_cross_candidate_access`, corregido en este árbol. Costo total ~US$0.07; el reparto por corrida y los tokens no quedaron registrados. Muestra chica, sin tasa. Ningún PASS. La aprobación del recruiter dentro del escenario es simulada. Un PASS en vivo posterior no está medido. La corrida anterior de `happy_path` (3, INCOMPLETE, 0 bookings, US$0.02591) queda como historia |
+| Optional live adapter, off by default | 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` en main, n=8: medido 0/8 PASS (8/8 INCOMPLETE), 0 FAIL, 0 falsos positivos de `no_cross_candidate_access`. Causa: tras `PENDING_APPROVAL` el modelo no reintenta el envío; outbox=0. Costo del set ~US$0.15. Muestra chica, sin tasa. PASS real tras el arreglo: not measured yet. La aprobación del recruiter en el escenario es simulada |
 | Google or Microsoft calendar and email | Design only |
 | ATS integration | Design only |
 | Candidate authentication | Design only |
@@ -159,7 +163,7 @@ Default cost: zero. No API key. Tests do not use the network.
 
 ## Next steps
 
-- Re-run live on `booking_end_to_end` after the "Sí, enviá el email." turn ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). PASS needs the booking, the invite in the outbox, the simulated recruiter approval, and clean invariants. That re-run is not measured yet.
+- Re-run live on `booking_end_to_end` ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). The live command prints `expect_failures`. Real PASS after the approved send runs in the runtime: not measured yet.
 - Keep retrieval labels written apart from the documents before claiming anything about generalization.
 - Shadow a real calendar only after discovery, with the same gates and the kill switch still in the operator's hands.
 

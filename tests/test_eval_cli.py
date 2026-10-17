@@ -30,6 +30,7 @@ def test_gate_passes_and_regression_exits_1() -> None:
     names = {item.name for result in broken.results for item in result.violations}
     assert "book_preceded_by_user_confirmation" in names
     assert "no_external_without_matching_approval" in names
+    assert "no_send_claim_without_outbox" in names
     happy = next(
         result for result in broken.results if result.scenario_id == "happy_path"
     )

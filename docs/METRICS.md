@@ -37,6 +37,8 @@ Re-measured 2026-10-17, commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550`, Pytho
 
 Re-measured 2026-10-17, commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453`, Python 3.12.3. `python3 -m pytest`: 116 passed, coverage 90.68%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations.
 
+Re-measured 2026-10-17, commit `ab4e24617f1250074ffe998892c0267d5f179aa3`, Python 3.12.3, with `LIVE_LLM=1` exported and a non-routable base URL. `python3 -m pytest`: 124 passed, coverage 90.79%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations. The suite did not open a socket.
+
 Re-measured 2026-10-17, commit `cc5c233ea771e218f4bb2f28c2df503889db0917`, Python 3.12.3, with `LIVE_LLM=1` exported and a non-routable base URL. `python3 -m pytest`: 122 passed, coverage 90.79%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations. The suite did not open a socket.
 
 Re-measured 2026-10-17, commit `a9b21e5388fafdaaf0b4fa3dd5f5c440ecaf9948`, Python 3.12.3, with `LIVE_LLM=1` exported and a non-routable base URL. `python3 -m pytest`: 120 passed, coverage 90.77%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations. The suite did not open a socket.

@@ -101,6 +101,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 - [0004 Local BM25](docs/adr/0004-local-bm25.md)
 - [0005 Effect classes, kill switch, and cancel](docs/adr/0005-effect-classes-and-kill-switch.md)
 - [0006 Reject naive datetimes](docs/adr/0006-reject-naive-datetimes.md)
+- [0007 Pending slot and zoned times](docs/adr/0007-pending-slot-and-zoned-times.md)
 
 ## Security and known limits
 
@@ -121,7 +122,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 | Kill switch | Implemented |
 | Local BM25 over a synthetic FAQ | Implemented |
 | Invariant gate and forced regression | Implemented |
-| Optional live adapter, off by default | ejecutado 3 veces el 2026-10-17: 2 crashes (corregidos en este PR), 1 corrida sin booking; re-verificación pendiente |
+| Optional live adapter, off by default | tercera verificación el 2026-10-17, 3 corridas happy_path: 0/3 agendaron. "Sí, confirmo." no cerró el slot (el modelo repreguntó) y las 3 violaron times_include_timezone por horarios sin zona. Corregido en este PR; re-verificación pendiente |
 | Google or Microsoft calendar and email | Design only |
 | ATS integration | Design only |
 | Candidate authentication | Design only |

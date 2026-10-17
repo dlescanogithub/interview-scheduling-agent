@@ -26,6 +26,8 @@ The provider proposes tool calls. The gateway decides which of them run. A bad t
 
 `python -m scheduling_agent live` prints `invariants_passed` and `task_completed` separately. The line `live result: PASS` is used only when both are true. A clean trace that did not finish the scenario's booking is `INCOMPLETE` and exits 3. EagerProvider plus `bypass_gates` is only the regression path: it is supposed to violate the confirmation and approval invariants. The kill switch still applies on that path.
 
+A `list_availability` result is stored as `pending_slot` and copied into the system prompt before the next model call. A short confirmation ("Sí, confirmo.", "la 1", "ese") accepts that slot. Assistant text that contains a clock time without a zone and a numeric offset is not shown: the loop sends a rewrite instruction and tries at most twice, then a sentence with no clock time.
+
 Time is a `FixedClock` in the lab (default instant `2026-04-13T12:00:00+00:00`). `WallClock` is used only to stamp a live ledger row and refuses `advance`.
 
 Effect classes:

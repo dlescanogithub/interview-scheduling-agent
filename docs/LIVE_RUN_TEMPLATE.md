@@ -1,8 +1,8 @@
 # Live run template
 
-ejecutado 3 veces el 2026-10-17: 2 crashes (corregidos en este PR), 1 corrida sin booking; re-verificación pendiente.
+Tercera verificación live, 2026-10-17: 3 corridas de `happy_path` con grok-4.20-0309-non-reasoning, comando `python3 -m scheduling_agent live --scenario happy_path --max-turns 12`. 0/3 agendaron. El usuario simulado dijo solo "Sí, confirmo." y el modelo repreguntó en vez de tomar el último slot. Las 3 corridas violaron `times_include_timezone` porque listaron horarios sin zona. Esas dos causas se corrigen en este PR (slot pendiente en el contexto, y un post-check que no muestra una hora sin offset). Re-verificación pendiente. Token counts and cost for those calls are not recorded here. Real-model results after the fix: none yet.
 
-Those three calls used grok-4.20-0309-non-reasoning on `python3 -m scheduling_agent live --scenario happy_path --max-turns 12`. Two runs died on an uncaught `ValueError: naive datetime: 2026-04-14T00:00:00`. The run that finished printed an invariant pass and booked nothing: the model used the interviewer id `ana-luz`, which is not on the roster. Token counts and cost for those calls are not recorded here. Do not treat that invariant pass as a completed task. Real-model results after the fix: none yet.
+An earlier trio on the same date crashed twice on a naive datetime and once booked nothing with interviewer id `ana-luz`. That crash is already fixed on main. Do not treat an invariant pass without a booking as a completed task.
 
 Do not fill this table from the scripted eval. A row is valid only after `python3 -m scheduling_agent live --scenario <id> --max-turns 12` against an OpenAI-compatible endpoint, with `LIVE_LLM=1` and a spend cap.
 

@@ -4,20 +4,27 @@ from __future__ import annotations
 
 import json
 import random
+import re
 from typing import Any, Protocol
 
 from scheduling_agent.approvals import slot_hash
 from scheduling_agent.cassette import CompletionRequest, CompletionResponse
 from scheduling_agent.config import Settings
 from scheduling_agent.dialogue import (
+    confirm_index,
+    extract_clock,
     is_cancel_action,
     is_refusal,
     is_reschedule_action,
     is_schedule_action,
-    is_yes,
+    latest_slots,
     own_booking,
+    parse_option_lines,
+    render_pending_slot,
     select_slot,
+    short_accept_index,
 )
+from scheduling_agent.invariants import TIME_RE, ZONE_RE
 from scheduling_agent.logging_setup import configure_logging, log_event
 from scheduling_agent.retry import RetryExhausted, retry_call
 from scheduling_agent.runtime import RunContext
@@ -36,6 +43,9 @@ class ProviderError(Exception):
 class SpendCapError(Exception):
     """A live call would cross the spend or token cap. Do not retry."""
 
+
+_OFFSET_RE = re.compile(r"UTC[+-]\d{1,2}(?::\d{2})?|[+-]\d{2}:\d{2}")
+_ZONE_REWRITES = 2
 
 _TERMINAL = {
     "proposal": "clarifying",
@@ -144,6 +154,7 @@ class Agent:
         ctx.trace.add("terminal", state=ctx.terminal)
 
     def _drive(self) -> str:
+        rewrites = 0
         for _ in range(8):
             if not self._cost_allows():
                 return self._handoff("cost_cap")
@@ -189,10 +200,20 @@ class Agent:
                             "content": json.dumps(result, ensure_ascii=False),
                         }
                     )
+                    self._remember_availability(result)
                     if result.get("status") == "BUDGET_EXCEEDED":
                         return self._handoff("tool_budget")
                 continue
             text = response.text or ""
+            if _lacks_explicit_zone(text):
+                if rewrites < _ZONE_REWRITES:
+                    rewrites += 1
+                    self.ctx.messages.append(
+                        {"role": "system", "content": _zone_feedback()}
+                    )
+                    continue
+                text = _unzoned_fallback(self.ctx.lang)
+            self._remember_offer(text)
             self.ctx.trace.add(
                 "assistant_message",
                 text=text,
@@ -206,6 +227,7 @@ class Agent:
         return self._handoff("max_rounds")
 
     def _complete(self) -> CompletionResponse:
+        self._sync_system()
         request = CompletionRequest(
             messages=self.ctx.messages,
             tools=openai_tools(),
@@ -300,7 +322,8 @@ class Agent:
             self.ctx.user_max_effect = "external"
 
     def _maybe_confirm(self, text: str) -> None:
-        if not is_yes(text):
+        choice = short_accept_index(text)
+        if choice is None:
             return
         ctx = self.ctx
         action = ctx.pending_action
@@ -318,9 +341,16 @@ class Agent:
                 slot_hash="",
             )
             return
-        slot = select_slot(ctx.messages, text)
-        if slot is None or action not in {"book", "reschedule"}:
+        slot = select_slot(ctx.messages, text) if choice == 0 else None
+        if slot is None and extract_clock(text) is not None:
             return
+        if slot is None:
+            slot = _offered_choice(ctx, choice)
+        if slot is None:
+            return
+        if action not in {"book", "reschedule"}:
+            action = "book"
+            ctx.pending_action = "book"
         digest = slot_hash(
             interviewer_id=str(slot["interviewer_id"]),
             candidate_id=ctx.candidate_id,
@@ -345,8 +375,103 @@ class Agent:
         confirm_kind = traced.pop("kind")
         ctx.trace.add("confirmation", confirm_kind=confirm_kind, **traced)
 
+    def _remember_availability(self, result: dict[str, Any]) -> None:
+        if result.get("name") != "list_availability" or result.get("status") != "OK":
+            return
+        output = result.get("output")
+        if not isinstance(output, dict):
+            return
+        raw = output.get("slots")
+        if not isinstance(raw, list):
+            return
+        slots = [item for item in raw if isinstance(item, dict)][:3]
+        if not slots:
+            return
+        ctx = self.ctx
+        ctx.offered_slots = slots
+        ctx.pending_slot = slots[0]
+        ctx.pending_index = 1
+        if ctx.pending_action not in {"cancel", "reschedule"}:
+            ctx.pending_action = "book"
+
+    def _remember_offer(self, text: str) -> None:
+        slots = self.ctx.offered_slots or latest_slots(self.ctx.messages)
+        options = parse_option_lines(text)
+        if not slots or not options:
+            return
+        wanted = confirm_index(text) or options[0][0]
+        chosen = next((row for row in options if row[0] == wanted), None)
+        if chosen is None:
+            return
+        slot = select_slot(
+            [*self.ctx.messages, {"role": "assistant", "content": text}],
+            "sí",
+        )
+        if slot is None:
+            slot = _match_listed(slots, chosen)
+        if slot is None:
+            return
+        self.ctx.offered_slots = slots
+        self.ctx.pending_slot = slot
+        self.ctx.pending_index = wanted
+        if self.ctx.pending_action not in {"cancel", "reschedule"}:
+            self.ctx.pending_action = "book"
+
+    def _sync_system(self) -> None:
+        if not self.ctx.messages:
+            return
+        first = self.ctx.messages[0]
+        content = str(first.get("content") or "")
+        if first.get("role") == "system" and "[session]" in content:
+            first["content"] = _system_prompt(self.ctx)
+
+
+def _offered_choice(ctx: RunContext, choice: int) -> dict[str, Any] | None:
+    slots = ctx.offered_slots or latest_slots(ctx.messages)
+    if choice == 0:
+        if ctx.pending_slot is not None:
+            return ctx.pending_slot
+        return slots[0] if slots else None
+    if choice < 1 or choice > len(slots):
+        return None
+    return slots[choice - 1]
+
+
+def _match_listed(
+    slots: list[dict[str, Any]], chosen: tuple[int, str, str, str]
+) -> dict[str, Any] | None:
+    from scheduling_agent.dialogue import match_slot
+
+    _index, date_text, start, zone = chosen
+    return match_slot(slots, date_text, start, zone)
+
+
+def _lacks_explicit_zone(text: str) -> bool:
+    """A clock the user would see without a zone name and a numeric offset."""
+    if TIME_RE.search(text) is None:
+        return False
+    if ZONE_RE.search(text) is None:
+        return True
+    return _OFFSET_RE.search(text) is None
+
+
+def _zone_feedback() -> str:
+    return (
+        "Rewrite the reply before the user sees it. "
+        "Every clock time needs an explicit zone and offset, "
+        "for example 1) mar 20/10 10:00 (ART, UTC-3). "
+        "A bare time is invalid. If the user already confirmed, use pending_slot."
+    )
+
+
+def _unzoned_fallback(lang: str) -> str:
+    if lang == "en":
+        return "I cannot show a time without its zone. I have not booked anything."
+    return "No puedo mostrar un horario sin la zona. No reservé nada."
+
 
 def _system_prompt(ctx: RunContext) -> str:
+    from scheduling_agent.dialogue import zone_phrase
     from scheduling_agent.timeutil import (
         WEEKDAYS_EN,
         format_zoned,
@@ -367,6 +492,15 @@ def _system_prompt(ctx: RunContext) -> str:
         "Every datetime you send to a tool must include a numeric offset.",
         "Naive datetimes are rejected. 2026-04-14T00:00:00 is invalid.",
         "Example of a valid datetime: 2026-10-20T10:00:00-03:00.",
+        "Offer at most 3 numbered slots, one per line, in this exact form:",
+        "1) mar 20/10 10:00 (ART, UTC-3)",
+        "Every clock time shown to the user uses that form, with ART or UTC",
+        "and a numeric offset such as UTC-3 or UTC+0. A bare 10:00 is invalid.",
+        "A short confirmation accepts pending_slot. Do not ask again.",
+        "Short confirmations: Sí, confirmo; sí; la 1; opción 1; ese.",
+        "When pending_slot is not none and the user sends one of those,",
+        "hold_slot and book_slot that exact start and end.",
+        render_pending_slot(ctx.pending_slot, ctx.pending_index),
         "Valid interviewer ids, exact spelling, with working windows:",
     ]
     roster = sorted(ctx.calendar.interviewers.values(), key=lambda row: row.id)
@@ -376,7 +510,8 @@ def _system_prompt(ctx: RunContext) -> str:
             open_t, close_t = window
             label = WEEKDAYS_EN[day]
             hours.append(
-                f"{label} {open_t.strftime('%H:%M')}-{close_t.strftime('%H:%M')}"
+                f"{label} {open_t.strftime('%H:%M')}-{close_t.strftime('%H:%M')} "
+                f"({zone_phrase(interviewer.timezone)})"
             )
         busy = ", ".join(
             f"{to_canonical(start)}..{to_canonical(end)}"

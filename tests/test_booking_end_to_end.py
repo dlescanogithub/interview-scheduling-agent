@@ -270,6 +270,7 @@ def test_live_end_to_end_books_only_after_the_exact_yes(
     assert "task_completed=true" in out
     assert "live result: PASS" in out
     assert "live result: INCOMPLETE" not in out
+    assert "expect_failures: none" in out
     tools = _tools(out)
     book_at = next(
         index
@@ -346,6 +347,8 @@ def test_live_end_to_end_without_send_invite_is_incomplete(
     assert "task_completed=false" in out
     assert "live result: INCOMPLETE" in out
     assert "live result: PASS" not in out
+    assert "expect_failures:" in out
+    assert "outbox" in out
     tools = _tools(out)
     assert any(
         payload.get("name") == "book_slot" and payload.get("executed") is True

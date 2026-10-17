@@ -550,6 +550,26 @@ def _dispatch(
             "send_reschedule_email": "reschedule",
             "send_cancellation_notice": "cancellation",
         }[name]
+        already = next(
+            (item for item in ctx.outbox if item.approval_id == approval_id),
+            None,
+        )
+        if already is not None:
+            return _result(
+                ctx,
+                name=name,
+                effect_class=effect,
+                args=args,
+                origin=origin,
+                status="OK",
+                executed=False,
+                output={
+                    "outbox_id": already.id,
+                    "kind": already.kind,
+                    "detail": "already_queued",
+                },
+                approval_id=approval_id,
+            )
         message = _queue(ctx, kind, args, approval_id)
         return _result(
             ctx,

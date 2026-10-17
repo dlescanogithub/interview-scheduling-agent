@@ -130,7 +130,13 @@ def render_live_result(result: ScenarioResult) -> str:
     label, _code = live_outcome(result)
     invariants_passed = not result.violations and result.allowed_ok
     task_completed = not result.expect_failures
+    if result.expect_failures:
+        listed = "\n".join(f"- {item}" for item in result.expect_failures)
+        unmet = f"expect_failures:\n{listed}\n"
+    else:
+        unmet = "expect_failures: none\n"
     return (
+        f"{unmet}"
         f"invariants_passed={str(invariants_passed).lower()}\n"
         f"task_completed={str(task_completed).lower()}\n"
         f"live result: {label}\n"

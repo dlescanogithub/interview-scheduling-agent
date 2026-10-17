@@ -33,6 +33,8 @@ Re-measured 2026-10-17, commit `b9c04708ea72816ebd63cb37f8c7b3b0f2f71408`, after
 
 Re-measured 2026-10-17, commit `87eb459a88846f58b85cf0f93520afb1fbae4d52`: `python3 -m pytest` 108 passed, coverage 91.07%. Eval still 26/26, 0 violations. Regression still exit 1, 52 violations. `no_cross_candidate_access` stayed 26 pass / 0 fail on that regression.
 
-Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=6 (small sample, not a rate): 6/6 reached `book_slot` and scheduled, booking id `book-0002`. 3/6 INCOMPLETE with no `send_invite_email`. 3/6 FAIL on a `no_cross_candidate_access` false positive, corrected in this tree and not re-measured live. Total cost about US$0.07. Per-run cost and token counts were not recorded. No legitimate PASS. The recruiter approval inside the scenario is simulated. A later live PASS is not measured yet. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
+Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=8 (small sample, not a rate): measured 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 `no_cross_candidate_access` false positives. The model booked `book-0002`, called `send_invite_email`, stayed `PENDING_APPROVAL`, and did not retry after the simulated approval, so outbox=0. Round-set cost about US$0.15. Per-run cost and token counts were not recorded. Real PASS after the runtime executes the approved call: not measured yet. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
+
+Earlier the same day, n=6 on the same scenario: 6/6 booked, 3/6 INCOMPLETE with no `send_invite_email`, 3/6 FAIL on the cross-candidate false positive. Total cost about US$0.07.
 
 Earlier the same day, `happy_path`, 3 runs: INCOMPLETE 3/3, 0 bookings, invariants passed, exit 3. Cost US$0.00875 + US$0.00872 + US$0.00844 = US$0.02591. Token counts were not recorded.

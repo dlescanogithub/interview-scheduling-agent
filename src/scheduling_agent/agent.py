@@ -126,6 +126,15 @@ class Agent:
                 ),
             }
         )
+        if row.status == "approved":
+            approved = execute_tool(ctx, row.tool, dict(row.args), origin="approval")
+            ctx.messages.append(
+                {
+                    "role": "tool",
+                    "name": row.tool,
+                    "content": json.dumps(approved, ensure_ascii=False),
+                }
+            )
         if ctx.turns > ctx.settings.max_turns:
             return self._handoff("max_turns")
         return self._drive()

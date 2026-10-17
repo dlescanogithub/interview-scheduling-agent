@@ -261,6 +261,11 @@ _SEND_CLAIMS = (
     "approved and sent",
     "have sent the",
     "i sent the",
+    "i sent you",
+    "se envio el email",
+    "fue enviado",
+    "te enviamos",
+    "went out",
     "emailed",
     "in the outbox",
 )
@@ -276,6 +281,8 @@ _CLAIM_NEGATIVES = (
     "did not ",
     "has not ",
     "have not ",
+    "will be ",
+    "quedara ",
 )
 
 
@@ -283,7 +290,9 @@ def _claims_completed_send(text: str) -> bool:
     """True when the text says a send or an approval already happened.
 
     A nearby negation ('no', 'not', 'nothing') keeps the pending copy legal:
-    'Todavía no se envió' and 'Nothing was sent yet' are not claims.
+    'Todavía no se envió' and 'Nothing was sent yet' are not claims. A future
+    or pending line is not a completed send either: 'will be emailed' and
+    'quedará en la bandeja de salida'.
     """
     folded = fold(text)
     for phrase in _SEND_CLAIMS:

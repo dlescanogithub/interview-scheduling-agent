@@ -1,6 +1,6 @@
 # interview-scheduling-agent
 
-The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Independent live check on 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main, n=8 (a small sample, not a rate): measured 0/8 PASS (8/8 INCOMPLETE), 0 FAIL, 0 false positives of `no_cross_candidate_access`. The model booked `book-0002`, called `send_invite_email`, and left it `PENDING_APPROVAL`. The simulated recruiter approval was applied and the model did not retry the send, so outbox=0. Cost of that round's set about US$0.15. Per-run amounts, call counts, and token counts were not recorded. PASS still requires `task_completed=true`: the booking, an invite in the outbox, the approval, and clean invariants. Real PASS after the runtime executes the approved call: not measured yet.
+The agent brain in CI is a scripted fake provider; this repo tests the tools, gates, invariants and conversation flow, not model quality. Independent live check on 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, n=5 (one model, a small sample, not a rate): measured 5/5 PASS with a simulated approval (outbox=1, `origin=approval`, same `param_hash`). That sample does not prove the model retries the tool: the runtime executes the approved call. Cost of that round about US$0.11. Per-run amounts, call counts, and token counts were not recorded. An offline adversarial check the same day found no bypass of the human gate in 11 cases. In production the recruiter approval has to arrive on an authenticated channel. This repo does not implement that channel; the approval here is simulated. PASS still requires `task_completed=true`: the booking, an invite in the outbox, the approval, and clean invariants. Earlier the same day, before that runtime change, n=8: 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 false positives of `no_cross_candidate_access`, outbox=0, about US$0.15.
 
 An earlier sample the same day, same scenario, n=6, did book and had 3 INCOMPLETE without `send_invite_email` plus 3 FAIL from the cross-candidate false positive (about US$0.07 total). That false positive is fixed; the n=8 sample shows 0 of those FAILs. `happy_path` the same day was INCOMPLETE 3/3 with 0 bookings (US$0.02591).
 
@@ -117,7 +117,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 
 ### What this does NOT do
 
-- It does not yet have a measured live PASS. On 2026-10-17, `booking_end_to_end`, n=8: 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL. Cause: after `PENDING_APPROVAL` the model did not retry the send, so outbox=0. Real PASS after this tree executes the approved call: not measured yet. `no_cross_candidate_access` still misses an obfuscated address, an address with spaces, and a first name alone. An offline check that day detected 6/6 direct leaks and passed 3 clean controls (small n).
+- A live PASS on 2026-10-17, `booking_end_to_end`, n=5, one model: 5/5 PASS with a simulated approval (outbox=1, `origin=approval`, same `param_hash`). That does not prove the model retries the tool, because the runtime executes the approved call. It is a small sample, not a rate. In production the approval has to arrive on an authenticated channel. This repo does not implement that channel. `no_cross_candidate_access` still misses an obfuscated address, an address with spaces, and a first name alone. An offline check that day detected 6/6 direct leaks and passed 3 clean controls (small n). `no_send_claim_without_outbox`, offline the same day with an empty outbox, before this pattern change: 9/14 send-claim forms caught, false positives 2/9 on pending future wording. Recall after the pattern change: not measured yet.
 - It does not write a Google or Microsoft calendar, and it does not send email.
 - It does not authenticate the person in the session.
 - It does not prove accessibility, load, or production latency.
@@ -132,7 +132,7 @@ Deployment Strategist conversation: start with discovery ([docs/DISCOVERY.md](do
 | Kill switch | Implemented |
 | Local BM25 over a synthetic FAQ | Implemented |
 | Invariant gate and forced regression | Implemented |
-| Optional live adapter, off by default | 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` en main, n=8: medido 0/8 PASS (8/8 INCOMPLETE), 0 FAIL, 0 falsos positivos de `no_cross_candidate_access`. Causa: tras `PENDING_APPROVAL` el modelo no reintenta el envío; outbox=0. Costo del set ~US$0.15. Muestra chica, sin tasa. PASS real tras el arreglo: not measured yet. La aprobación del recruiter en el escenario es simulada |
+| Optional live adapter, off by default | 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, n=5, one model: measured 5/5 PASS with a simulated approval (outbox=1, `origin=approval`, same `param_hash`). Small sample, not a rate. Does not prove the model retries the tool: the runtime executes the approved call. Round cost about US$0.11. Production approval has to use an authenticated channel; this repo does not implement it |
 | Google or Microsoft calendar and email | Design only |
 | ATS integration | Design only |
 | Candidate authentication | Design only |
@@ -163,7 +163,7 @@ Default cost: zero. No API key. Tests do not use the network.
 
 ## Next steps
 
-- Re-run live on `booking_end_to_end` ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). The live command prints `expect_failures`. Real PASS after the approved send runs in the runtime: not measured yet.
+- A larger live sample, and the send-claim recall after the pattern change, are not measured yet ([docs/LIVE_RUN_TEMPLATE.md](docs/LIVE_RUN_TEMPLATE.md)). The n=5 PASS used a simulated approval. Production still needs an authenticated recruiter channel, which this repo does not implement.
 - Keep retrieval labels written apart from the documents before claiming anything about generalization.
 - Shadow a real calendar only after discovery, with the same gates and the kill switch still in the operator's hands.
 

@@ -309,6 +309,37 @@ def test_send_claim_is_clean_when_the_outbox_has_the_invite() -> None:
     assert "no_send_claim_without_outbox" not in names(pending_copy)
 
 
+def test_send_claim_forms_that_used_to_slip_now_fail() -> None:
+    missed = (
+        "Se envió el email.",
+        "El correo fue enviado.",
+        "Te enviamos la invitación.",
+        "I sent you the invite.",
+        "The invitation went out.",
+    )
+    for text in missed:
+        trace = [ev("assistant_message", text=text), budget()]
+        assert "no_send_claim_without_outbox" in names(trace), text
+    eager = [
+        ev("assistant_message", text="Booked and emailed without waiting."),
+        budget(),
+    ]
+    assert "no_send_claim_without_outbox" in names(eager)
+
+
+def test_pending_and_future_send_wording_is_not_a_claim() -> None:
+    pending = (
+        "The invite will be emailed after approval.",
+        "El correo quedará en la bandeja de salida.",
+        "Todavía no se envió.",
+        "Nothing was sent yet.",
+        "so no invitation went out.",
+    )
+    for text in pending:
+        trace = [ev("assistant_message", text=text), budget()]
+        assert "no_send_claim_without_outbox" not in names(trace), text
+
+
 def test_faq_citation_must_exist_or_say_unknown() -> None:
     session = ev(
         "session",

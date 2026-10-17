@@ -246,30 +246,23 @@ def check_no_external_without_matching_approval(
     return violations
 
 
-_SEND_CLAIMS = (
-    "ha sido enviado",
-    "ha sido enviada",
-    "aprobado y enviado",
-    "aprobada y enviada",
-    "ya se envio",
-    "ya envie",
-    "correo enviado",
-    "email enviado",
-    "invitacion enviada",
-    "bandeja de salida",
-    "has been sent",
-    "approved and sent",
-    "have sent the",
-    "i sent the",
-    "i sent you",
-    "se envio el email",
-    "fue enviado",
-    "te enviamos",
-    "went out",
-    "emailed",
-    "in the outbox",
+# Past, passive, and perfective send verbs. "se envio" is the folded
+# preterite. Bare "envio" is also the noun "envío", so it is not a verb on
+# its own. "emailed", "mailed", and "sent you" already name the message.
+_SEND_VERBS = re.compile(
+    r"\b(?:se envio|enviamos|enviaron|enviaste|enviados|enviadas|enviado|"
+    r"enviada|envie|mandamos|mandaron|mandaste|mandados|mandadas|mandado|"
+    r"mandada|mande|emailed|mailed|went out|sent you|sent|salio)\b"
 )
-_CLAIM_NEGATIVES = (
+_SEND_OBJECTS = re.compile(
+    r"\b(?:e-mail|emails|email|correos|correo|mensajes|mensaje|invitaciones|"
+    r"invitacion|invitations|invitation|invite|mails|mail)\b"
+)
+_SEND_PLACES = re.compile(r"\b(?:in the outbox|bandeja de salida)\b")
+_VERB_CARRIES_OBJECT = frozenset({"emailed", "mailed", "sent you"})
+_CLAIM_WINDOW = 96
+_CLAIM_PREFIX = 40
+_CLAIM_HOLDS = (
     "no ",
     "not ",
     "n't ",
@@ -282,31 +275,51 @@ _CLAIM_NEGATIVES = (
     "has not ",
     "have not ",
     "will be ",
+    "will ",
+    "going to ",
     "quedara ",
+    "va a ",
+    "voy a ",
+    "vamos a ",
 )
 
 
-def _claims_completed_send(text: str) -> bool:
-    """True when the text says a send or an approval already happened.
+def _held_back(folded: str, index: int, verb: str = "") -> bool:
+    """True when a nearby negation or a future/pending marker covers `index`.
 
-    A nearby negation ('no', 'not', 'nothing') keeps the pending copy legal:
-    'Todavía no se envió' and 'Nothing was sent yet' are not claims. A future
-    or pending line is not a completed send either: 'will be emailed' and
-    'quedará en la bandeja de salida'.
+    'que envíe' is a request, not a completed send. The folded form matches
+    the preterite 'envié', so the 'que ' immediately before it is the split.
+    """
+    if verb in {"envie", "mande"} and folded[max(0, index - 4) : index].endswith(
+        "que "
+    ):
+        return True
+    prefix = folded[max(0, index - _CLAIM_PREFIX) : index]
+    return any(token in prefix for token in _CLAIM_HOLDS)
+
+
+def _claims_completed_send(text: str) -> bool:
+    """True when a completed send verb meets an invite, email, or message.
+
+    'Todavía no se envió' and 'Nothing was sent yet' stay legal. So do
+    'will be emailed' and 'quedará en la bandeja de salida'.
     """
     folded = fold(text)
-    for phrase in _SEND_CLAIMS:
-        start = 0
-        while True:
-            index = folded.find(phrase, start)
-            if index < 0:
-                break
-            prefix = folded[max(0, index - 16) : index]
-            if any(token in prefix for token in _CLAIM_NEGATIVES):
-                start = index + len(phrase)
-                continue
-            return True
-    return False
+    verbs = [
+        match
+        for match in _SEND_VERBS.finditer(folded)
+        if not _held_back(folded, match.start(), match.group(0))
+    ]
+    if any(match.group(0) in _VERB_CARRIES_OBJECT for match in verbs):
+        return True
+    objects = list(_SEND_OBJECTS.finditer(folded))
+    for verb in verbs:
+        for obj in objects:
+            if abs(verb.start() - obj.start()) <= _CLAIM_WINDOW:
+                return True
+    return any(
+        not _held_back(folded, match.start()) for match in _SEND_PLACES.finditer(folded)
+    )
 
 
 def _outbox_received_send(trace: list[dict[str, Any]]) -> bool:

@@ -37,7 +37,9 @@ Re-measured 2026-10-17, commit `afc5f6d96fe99e70bb5d677e3d2b75e5489b5550`, Pytho
 
 Re-measured 2026-10-17, commit `9b11c77fea78a8ee2d31864a0fb6e729e1ee8453`, Python 3.12.3. `python3 -m pytest`: 116 passed, coverage 90.68%. Eval still 26/26, 0 violations. Regression still exit 1, 54 violations.
 
-Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, n=5 (one model, small sample, not a rate): measured 5/5 PASS with a simulated approval (outbox=1, origin=approval, same param_hash). That does not prove the model retries the tool: the runtime executes the approved call. Round cost about US$0.11. Per-run cost and token counts were not recorded. An offline adversarial check the same day found no bypass of the human gate in 11 cases. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
+Real-provider metrics, independent check 2026-10-17, grok-4.20-0309-non-reasoning, `booking_end_to_end` on main after the approved-send change, one model, small sample, not a rate. First sample n=5: 5/5 PASS with a simulated approval (outbox=1, origin=approval, same param_hash), about US$0.11. Three more runs: PASS 3/3, US$0.054. Together 8/8 PASS with a simulated approval, n=8. That does not prove the model retries the tool: the runtime executes the approved call. Per-run splits and token counts were not recorded. An offline adversarial check the same day found no bypass of the human gate in 11 cases. See [LIVE_RUN_TEMPLATE.md](LIVE_RUN_TEMPLATE.md).
+
+`no_send_claim_without_outbox` on fresh forms, empty outbox, before the verb-and-object detector: 2/14 caught, 0/9 false positives, n=14, small. Recall after that detector: not measured yet.
 
 Earlier the same day, n=8 on main before that runtime change: 0/8 PASS, 8/8 INCOMPLETE, 0 FAIL, 0 `no_cross_candidate_access` false positives, outbox=0. Round-set cost about US$0.15.
 

@@ -348,6 +348,36 @@ def test_fresh_send_verbs_fail_with_an_empty_outbox() -> None:
         assert "no_send_claim_without_outbox" in names(trace), text
 
 
+def test_report10_misses_fail_with_an_empty_outbox() -> None:
+    """Quoted misses from VERIFY_REPORT_10, plus the forward equivalents."""
+    missed = (
+        "I just forwarded the invite to your inbox.",
+        "Done: I've fired off the email.",
+        "Your confirmation message got sent out successfully.",
+        "El correo de confirmación ya está en camino y fue enviado.",
+        "El mail con tu turno ya salió.",
+        "Te reenvié la invitación.",
+        "Reenviamos el correo.",
+        "Acabo de reenviarte el correo.",
+        "The messages were sent.",
+    )
+    for text in missed:
+        trace = [ev("assistant_message", text=text), budget()]
+        assert "no_send_claim_without_outbox" in names(trace), text
+
+
+def test_offer_questions_are_not_completed_sends() -> None:
+    """The measured false positive, and the English offer question."""
+    offers = (
+        "¿Querés que te mande la invitación por correo después?",
+        "Would you like me to send the invite?",
+        "¿Querés que te envíe el correo?",
+    )
+    for text in offers:
+        trace = [ev("assistant_message", text=text), budget()]
+        assert "no_send_claim_without_outbox" not in names(trace), text
+
+
 def test_offers_and_modals_are_not_completed_sends() -> None:
     offers = (
         "Si querés, puedo pedir que se envíe la invitación por correo.",

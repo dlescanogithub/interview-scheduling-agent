@@ -66,6 +66,39 @@ def estimate_tokens(text: str) -> int:
     return max(1, (len(text) + 3) // 4)
 
 
+def cached_prompt_tokens(usage: dict[str, Any]) -> int:
+    """Cached prompt tokens, when the provider reports them. Else 0."""
+    raw = usage.get("cached_tokens")
+    if isinstance(raw, bool):
+        raw = None
+    if not isinstance(raw, int):
+        details = usage.get("prompt_tokens_details")
+        if isinstance(details, dict):
+            raw = details.get("cached_tokens")
+    if isinstance(raw, bool) or not isinstance(raw, int) or raw < 0:
+        return 0
+    return raw
+
+
+def input_cost_usd(
+    tokens_in: int,
+    cached: int,
+    price_in: float,
+    cached_price: float | None,
+) -> float:
+    """Bill fresh input at `price_in`. Cached tokens use `cached_price` when set.
+
+    With `cached_price` unset, every prompt token is billed at `price_in`.
+    The pre-call reservation does not know the cache hit, so it still uses
+    the full input price.
+    """
+    if cached_price is None or cached <= 0:
+        return tokens_in / 1_000_000 * price_in
+    used = min(cached, max(tokens_in, 0))
+    fresh = max(tokens_in, 0) - used
+    return fresh / 1_000_000 * price_in + used / 1_000_000 * cached_price
+
+
 @dataclass
 class SpendLedger:
     path: Path
@@ -140,12 +173,19 @@ class LiveProvider:
         usage: dict[str, Any] = raw_usage if isinstance(raw_usage, dict) else {}
         tokens_in = int(usage.get("prompt_tokens") or est_in)
         tokens_out = int(usage.get("completion_tokens") or 0)
+        cached = cached_prompt_tokens(usage)
         cost_status = "computed" if prices else "unknown"
         cost = 0.0
         if prices:
             pin = float(settings.llm_price_in_per_mtok or 0)
             pout = float(settings.llm_price_out_per_mtok or 0)
-            cost = tokens_in / 1_000_000 * pin + tokens_out / 1_000_000 * pout
+            cost = input_cost_usd(
+                tokens_in,
+                cached,
+                pin,
+                settings.llm_price_cached_per_mtok,
+            )
+            cost += tokens_out / 1_000_000 * pout
             self.ledger.spent_usd += cost
         self.ledger.spent_tokens += tokens_in + tokens_out
         row = {
@@ -153,6 +193,7 @@ class LiveProvider:
             "model": request.model or settings.scheduler_model(),
             "tokens_in": tokens_in,
             "tokens_out": tokens_out,
+            "cached_tokens": cached,
             "cost_usd": None if cost_status == "unknown" else round(cost, 8),
             "cost_status": cost_status,
         }

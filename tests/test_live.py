@@ -18,6 +18,7 @@ from scheduling_agent.live import (
     UrllibTransport,
     chat_url,
     estimate_tokens,
+    input_cost_usd,
 )
 from scheduling_agent.timeutil import parse_iso
 
@@ -149,6 +150,65 @@ def test_ledger_row_omits_the_key(tmp_path: Path) -> None:
     blob = (tmp_path / "ledger.jsonl").read_text(encoding="utf-8")
     assert KEY not in blob
     assert KEY not in json.dumps(ledger.rows)
+
+
+def test_cached_price_discounts_reported_usage(tmp_path: Path) -> None:
+    """VERIFY_REPORT_11 arithmetic: full input price vs a cached price.
+
+    35629 in, 24576 cached, 716 out. Full price at 1.25/2.50 is about 2.3x
+    the tick cost. A cached price of 0.20 brings the ledger onto that tick cost.
+    The reservation still uses the full input price and does not see the cache.
+    """
+    usage = {
+        "prompt_tokens": 35629,
+        "completion_tokens": 716,
+        "prompt_tokens_details": {"cached_tokens": 24576},
+    }
+    full = input_cost_usd(35629, 24576, 1.25, None) + 716 / 1_000_000 * 2.50
+    discounted = input_cost_usd(35629, 24576, 1.25, 0.20) + 716 / 1_000_000 * 2.50
+    assert round(full, 8) == 0.04632625
+    assert round(discounted, 8) == 0.02052145
+    assert full / 0.0205215 == pytest.approx(2.3, abs=0.05)
+
+    transport = FakeTransport(
+        {
+            "choices": [{"message": {"content": "ok", "tool_calls": []}}],
+            "usage": usage,
+        }
+    )
+    ledger = SpendLedger(tmp_path / "ledger.jsonl")
+    provider = LiveProvider(
+        _settings(
+            llm_price_in_per_mtok=1.25,
+            llm_price_out_per_mtok=2.50,
+            llm_price_cached_per_mtok=0.20,
+            max_live_spend_usd=1.0,
+            llm_max_output_tokens=800,
+        ),
+        transport,
+        ledger,
+    )
+    provider.complete(_request("hola"))
+    assert ledger.rows[0]["cached_tokens"] == 24576
+    assert ledger.rows[0]["cost_usd"] == round(discounted, 8)
+
+    plain = LiveProvider(
+        _settings(
+            llm_price_in_per_mtok=1.25,
+            llm_price_out_per_mtok=2.50,
+            max_live_spend_usd=1.0,
+            llm_max_output_tokens=800,
+        ),
+        FakeTransport(
+            {
+                "choices": [{"message": {"content": "ok", "tool_calls": []}}],
+                "usage": usage,
+            }
+        ),
+        SpendLedger(tmp_path / "plain.jsonl"),
+    )
+    plain.complete(_request("hola"))
+    assert plain.ledger.rows[0]["cost_usd"] == round(full, 8)
 
 
 def test_transport_errors_are_redacted(tmp_path: Path) -> None:

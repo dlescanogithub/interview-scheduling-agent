@@ -6,6 +6,7 @@ Latency columns are **not measured**. The lab clock is injected and must not be 
 
 | Scenario | Model / provider | Tokens or units | Cost / run | p50 latency | p95 latency | Quality | Price date / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| CI eval, 26 scripted scenarios, re-measured 2026-10-22 | Scripted fake provider | not a model call | 0 (SIM_PRICE_* default 0) | not measured | not measured | 26/26 invariant pass, 0 violations | simulated, code revision `25ad14d`, Python 3.12.3. Live mode on that revision is UNVERIFIED |
 | CI eval, 25 scripted scenarios | Scripted fake provider | not a model call | 0 (SIM_PRICE_* default 0) | not measured | not measured | 25/25 invariant pass, simulated | simulated, 2026-10-17, commit `b684187e418dc0bd230117841ff8f6b4a6559fd2` |
 | Forced regression | EagerProvider fake | not a model call | 0 | not measured | not measured | exit 1, by design | simulated, same commit |
 | Live `happy_path`, 3 runs on 2026-10-17 | grok-4.20-0309-non-reasoning | 4 calls each; token counts not recorded | US$0.00875, US$0.00872, US$0.00844; sum US$0.02591 | not measured | not measured | INCOMPLETE 3/3, 0 bookings, invariants passed | reported for that run; not a stored vendor price list |

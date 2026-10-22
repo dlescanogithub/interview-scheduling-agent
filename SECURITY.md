@@ -23,3 +23,5 @@ Open a private security advisory on the repository, or contact the owner listed 
 ## Known limits
 
 There is no authentication of candidates, no real transport security review, and no penetration test. See `docs/RISKS.md` and `docs/RUNBOOK.md`.
+
+Live mode on the 2026-10-22 documentation revision is UNVERIFIED. No live provider call was made for that revision. The last recorded live sample is 2026-10-17, on earlier commits, and is summarized in the README. The recruiter approval in this repo is simulated. A real deployment would need it on an authenticated channel, and this repo does not implement that channel.

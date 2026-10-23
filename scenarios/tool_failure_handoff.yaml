@@ -1,13 +1,13 @@
 id: tool_failure_handoff
 description: The provider fails until retries are exhausted.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools: []
 fail_provider_times: 3
 steps:
 - role: user
-  text: Quiero una entrevista con Ana Luz el 14 de abril de 2026. Zona America/Argentina/Buenos_Aires.
+  text: I want an interview with Ana Luz on April 14, 2026. My time zone is America/Argentina/Buenos_Aires.
 expect:
   booked: false
   outbox_max: 0

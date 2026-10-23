@@ -1,7 +1,7 @@
 id: timezone_mismatch
 description: Candidate zone is New York; the interviewer is in Buenos Aires.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools:
 - list_availability
@@ -13,9 +13,9 @@ allowed_tools:
 - search_faq
 steps:
 - role: user
-  text: Quiero una entrevista con Ana Luz el 14 de abril de 2026. Mi zona es America/New_York.
+  text: I want an interview with Ana Luz on April 14, 2026. My time zone is America/New_York.
 - role: user
-  text: Sí, confirmo.
+  text: Yes, I confirm.
 - role: recruiter
   decision: approve
 expect:

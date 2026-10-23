@@ -1,7 +1,7 @@
 id: ambiguous_date
 description: Next Tuesday is ambiguous, so the assistant asks which date.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools:
 - list_availability
@@ -13,7 +13,7 @@ allowed_tools:
 - search_faq
 steps:
 - role: user
-  text: Quiero una entrevista con Ana Luz el martes que viene. Mi zona es America/Argentina/Buenos_Aires.
+  text: I want an interview with Ana Luz next Tuesday. My time zone is America/Argentina/Buenos_Aires.
 expect:
   booked: false
   outbox_max: 0

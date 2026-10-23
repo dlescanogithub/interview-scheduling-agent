@@ -16,7 +16,7 @@ interviewers:
     busy:
       - start: "2026-04-14T13:00:00-03:00"
         end: "2026-04-14T14:00:00-03:00"
-        reason: equipo
+        reason: team meeting
   - id: iv-bruno
     name: Bruno Paz
     email: bruno.paz@taller-aurora.example
@@ -32,7 +32,7 @@ interviewers:
     busy:
       - start: "2026-04-16T09:00:00-03:00"
         end: "2026-04-16T11:00:00-03:00"
-        reason: taller
+        reason: workshop block
   - id: iv-camila
     name: Camila Norte
     email: camila.norte@taller-aurora.example
@@ -48,7 +48,7 @@ interviewers:
     busy:
       - start: "2026-04-14T14:00:00+00:00"
         end: "2026-04-14T15:00:00+00:00"
-        reason: foco
+        reason: focus block
   - id: iv-elena
     name: Elena Sur
     email: elena.sur@taller-aurora.example
@@ -64,17 +64,17 @@ interviewers:
     busy:
       - start: "2026-04-15T12:00:00+00:00"
         end: "2026-04-15T13:00:00+00:00"
-        reason: clinica interna
+        reason: internal clinic
 candidates:
   - id: cand-uno
-    name: Candidata Uno
-    email: candidata.uno@mail.example
+    name: Candidate One
+    email: candidate.one@mail.example
     timezone: America/Argentina/Buenos_Aires
   - id: cand-dos
-    name: Candidato Dos
-    email: candidato.dos@mail.example
+    name: Candidate Two
+    email: candidate.two@mail.example
     timezone: UTC
   - id: cand-tres
-    name: Candidata Tres
-    email: candidata.tres@mail.example
+    name: Candidate Three
+    email: candidate.three@mail.example
     timezone: America/New_York

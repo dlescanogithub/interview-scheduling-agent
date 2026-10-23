@@ -11,7 +11,7 @@ from scheduling_agent.tools import execute_tool
 EMAIL_A = {
     "booking_id": "book-a",
     "candidate_id": "cand-uno",
-    "to": "candidata.uno@mail.example",
+    "to": "candidate.one@mail.example",
     "interviewer_id": "iv-ana",
     "start": "2026-04-14T12:00:00Z",
     "timezone": "America/Argentina/Buenos_Aires",
@@ -24,7 +24,7 @@ class Quiet:
 
     def complete(self, request: CompletionRequest) -> CompletionResponse:
         assert request.messages
-        return CompletionResponse(text="Sigo en el chat.", purpose="talk")
+        return CompletionResponse(text="I am still in the chat.", purpose="talk")
 
 
 def test_approval_executes_the_stored_param_hash() -> None:

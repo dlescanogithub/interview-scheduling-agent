@@ -1,5 +1,5 @@
 id: happy_path_en
-description: Same booking flow in English.
+description: Same booking flow, confirmed with a short yes.
 candidate_id: cand-uno
 lang: en
 provider: scripted

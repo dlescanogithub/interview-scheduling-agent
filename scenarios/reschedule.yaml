@@ -1,7 +1,7 @@
 id: reschedule
 description: Move an existing booking after a yes, then send a reschedule notice.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools:
 - get_booking
@@ -20,9 +20,9 @@ fixture_bookings:
   end: '2026-04-15T13:45:00-03:00'
 steps:
 - role: user
-  text: Necesito reprogramar mi entrevista con Ana Luz. Zona America/Argentina/Buenos_Aires.
+  text: I need to reschedule my interview with Ana Luz. My time zone is America/Argentina/Buenos_Aires.
 - role: user
-  text: Sí, confirmo.
+  text: Yes, I confirm.
 - role: recruiter
   decision: approve
 expect:

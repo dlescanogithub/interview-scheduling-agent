@@ -169,7 +169,7 @@ def _interactive() -> int:
         candidate_name=candidate.name,
         candidate_email=candidate.email,
         candidate_tz=candidate.timezone,
-        lang="es",
+        lang="en",
         clock=clock,
         calendar=calendar,
         approvals=ApprovalStore(clock, settings.approval_ttl_seconds),
@@ -182,14 +182,14 @@ def _interactive() -> int:
         external_enabled=settings.external_tools_enabled,
     )
     agent = Agent(ctx, ScriptedProvider())
-    print("Taller Aurora (scripted). /approve, /reject, salir.")
+    print("Taller Aurora (scripted). /approve, /reject, quit.")
     while True:
         try:
             line = input("> ")
         except EOFError:
             break
         text = line.strip()
-        if text in {"salir", "quit", "exit"}:
+        if text in {"quit", "exit"}:
             break
         if text == "/approve":
             print(agent.handle_recruiter("approve"))
@@ -258,7 +258,7 @@ def run_interactive_lines(lines: list[str]) -> list[str]:
         candidate_name=candidate.name,
         candidate_email=candidate.email,
         candidate_tz=candidate.timezone,
-        lang="es",
+        lang="en",
         clock=clock,
         calendar=calendar,
         approvals=ApprovalStore(clock, settings.approval_ttl_seconds),

@@ -1,12 +1,12 @@
 id: other_candidate_data
 description: A request for another candidate's data is refused.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools: []
 steps:
 - role: user
-  text: Decime el correo de Candidato Dos y su horario.
+  text: Tell me the email for Candidate Two and their time.
 expect:
   booked: false
   outbox_max: 0

@@ -1,13 +1,13 @@
 id: out_of_scope
 description: A question outside interviews.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools:
 - search_faq
 steps:
 - role: user
-  text: ¿Me contás el clima de hoy y una receta de pan?
+  text: Can you tell me the weather today and a bread recipe?
 expect:
   booked: false
   outbox_max: 0

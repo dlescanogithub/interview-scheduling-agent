@@ -21,7 +21,7 @@ LIST_ARGS = {
     "duration_minutes": 45,
     "limit": 3,
 }
-_EMAIL = "candidata.uno@mail.example"
+_EMAIL = "candidate.one@mail.example"
 
 
 def _call(name: str, arguments: dict[str, Any], call_id: str) -> dict[str, Any]:
@@ -103,7 +103,7 @@ class FlowTransport:
             for message in messages
             if message.get("role") == "user"
         ]
-        exact = any("horario exacto" in text for text in users)
+        exact = any("that exact time" in text for text in users)
         recruiter = any(
             message.get("role") == "system"
             and str(message.get("content") or "").startswith("recruiter_decision=")
@@ -115,9 +115,9 @@ class FlowTransport:
         output = listed.get("output")
         slots = output.get("slots") if isinstance(output, dict) else None
         if not isinstance(slots, list) or not slots:
-            return _text("No tengo horarios libres. No reservé nada.")
+            return _text("I have no free times. I did not book anything.")
         lines = [
-            format_slot_line(index, slot, "es")
+            format_slot_line(index, slot, "en")
             for index, slot in enumerate(slots, start=1)
             if isinstance(slot, dict)
         ]
@@ -127,8 +127,8 @@ class FlowTransport:
             for message in messages
         )
         if not offered:
-            offer = "Puedo ofrecerte estas opciones.\n" + "\n".join(lines)
-            offer += "\nRespondé sí para confirmar la opción 1."
+            offer = "I can offer these options.\n" + "\n".join(lines)
+            offer += "\nReply yes to confirm option 1."
             return _text(offer)
         slot = slots[0]
         held = _ok(payloads, "hold_slot")
@@ -146,10 +146,9 @@ class FlowTransport:
         if not exact or not FlowTransport.book:
             if not exact:
                 return _text(
-                    "Dejé la opción 1 en hold. Para reservar, confirmá ese horario.\n"
-                    + lines[0]
+                    "I put option 1 on hold. To book, confirm that time.\n" + lines[0]
                 )
-            return _text("No reservé nada.")
+            return _text("I did not book anything.")
         booked = _ok(payloads, "book_slot")
         if booked is None:
             hold_out = held.get("output")
@@ -165,15 +164,15 @@ class FlowTransport:
                 },
                 "call-book",
             )
-        asked = any("envia el email" in fold(text) for text in users)
+        asked = any("send the email" in fold(text) for text in users)
         if not asked or not FlowTransport.send:
             if not asked:
                 return _text(
-                    "Quedó reservado.\n"
+                    "It is booked.\n"
                     + lines[0]
-                    + "\n¿Querés que envíe el correo? Todavía no lo envié."
+                    + "\nWould you like me to send the invite? I have not sent it."
                 )
-            return _text("No envié el correo.")
+            return _text("I did not send the email.")
         sent = _ok(payloads, "send_invite_email")
         pending = any(
             payload.get("name") == "send_invite_email"
@@ -183,9 +182,10 @@ class FlowTransport:
         if sent is None and not recruiter:
             if pending:
                 return _text(
-                    "Quedó reservado.\n"
+                    "It is booked.\n"
                     + lines[0]
-                    + "\nFalta la aprobación del recruiter. No envié el correo."
+                    + "\nThe recruiter still has to approve it. "
+                    + "I did not send the email."
                 )
             book_out = booked.get("output")
             booking_id = ""
@@ -220,9 +220,7 @@ class FlowTransport:
                 },
                 "call-mail-approved",
             )
-        return _text(
-            "Listo. El correo quedó en la bandeja de salida después de la aprobación."
-        )
+        return _text("Done. The email is in the outbox after approval.")
 
 
 @pytest.fixture(autouse=True)
@@ -282,9 +280,9 @@ def test_live_end_to_end_books_only_after_the_exact_yes(
     assert sends[0]["executed"] is False
     assert sends[-1]["status"] == "OK"
     assert sends[-1]["executed"] is True
-    exact_at = out.index("Sí, confirmo ese horario exacto.")
+    exact_at = out.index("Yes, I confirm that exact time.")
     book_line = out.index('"name": "book_slot"')
-    send_ask = out.index("Sí, enviá el email.")
+    send_ask = out.index("Yes, send the email.")
     assert exact_at < book_line < send_ask
     assert send_ask < out.index('"name": "send_invite_email"')
     sent_at = next(
@@ -327,7 +325,7 @@ def test_happy_path_live_still_incomplete_without_the_second_yes(
     assert "invariants_passed=true" in out
     assert "task_completed=false" in out
     assert "live result: INCOMPLETE" in out
-    assert "horario exacto" not in out
+    assert "that exact time" not in out
     assert all(
         not (payload.get("name") == "book_slot" and payload.get("executed") is True)
         for payload in _tools(out)
@@ -366,7 +364,7 @@ def test_simulated_approval_without_outbox_is_incomplete(
     code = main(["live", "--scenario", "booking_end_to_end", "--max-turns", "12"])
     out = capsys.readouterr().out
     assert code == 3
-    assert "Sí, enviá el email." in out
+    assert "Yes, send the email." in out
     assert "approval_decision" not in out
     assert "live result: INCOMPLETE" in out
     assert "live result: PASS" not in out

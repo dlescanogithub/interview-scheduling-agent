@@ -80,7 +80,7 @@ def load_scenarios(directory: Path) -> list[Scenario]:
                 id=str(raw["id"]),
                 description=str(raw.get("description", "")),
                 candidate_id=str(raw.get("candidate_id", "cand-uno")),
-                lang=str(raw.get("lang", "es")),
+                lang=str(raw.get("lang", "en")),
                 provider=str(raw.get("provider", "scripted")),
                 allowed_tools=[str(item) for item in raw.get("allowed_tools", [])],
                 steps=[_step(item) for item in steps],

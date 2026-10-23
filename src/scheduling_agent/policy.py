@@ -403,10 +403,7 @@ class ScriptedProvider:
             if top.get("trust") == "untrusted" or has_injection(excerpt):
                 return _say(request, _copy(lang, "injection"), "unknown", unknown=True)
             return _say(request, _copy(lang, "unknown"), "unknown", unknown=True)
-        if lang == "es":
-            body = f"{excerpt} Fuente: {doc_id}."
-        else:
-            body = f"{excerpt} Source: {doc_id}."
+        body = f"{excerpt} Source: {doc_id}."
         if goal_of(messages) == "schedule" and latest_slots(messages):
             slot = latest_slots(messages)[0]
             body = (
@@ -582,10 +579,7 @@ class ScriptedProvider:
         chosen = slots[index - 1]
         intro = _copy(lang, "restate")
         line = format_slot_line(1, chosen, lang)
-        if lang == "es":
-            ask = "Respondé sí para confirmar la opción 1."
-        else:
-            ask = "Reply yes to confirm option 1."
+        ask = "Reply yes to confirm option 1."
         return _say(request, f"{intro}\n{line}\n{ask}", purpose)
 
 
@@ -626,21 +620,13 @@ def _last_output(messages: list[dict[str, Any]], name: str) -> dict[str, Any] | 
 
 
 def _intro_miss(lang: str, clock: str, zone: str) -> str:
+    del lang
     label = zone_phrase(zone)
-    if lang == "es":
-        return (
-            f"El horario {clock} ({label}) no está libre. "
-            "Puedo ofrecerte estas opciones."
-        )
     return f"The time {clock} ({label}) is not free. I can offer these options."
 
 
 def _ask_tuesday(lang: str, first: str, second: str) -> str:
-    if lang == "es":
-        return (
-            f"¿Te referís al martes {first} o al martes {second}? "
-            "Respondé con la fecha. Todavía no reservé nada."
-        )
+    del lang
     return (
         f"Do you mean Tuesday {first} or Tuesday {second}? "
         "Reply with the date. I have not booked anything."
@@ -648,133 +634,80 @@ def _ask_tuesday(lang: str, first: str, second: str) -> str:
 
 
 def _copy(lang: str, key: str) -> str:
-    table: dict[str, tuple[str, str]] = {
-        "offer": (
-            "Puedo ofrecerte estas opciones.",
-            "I can offer these options.",
-        ),
-        "reschedule_offer": (
-            "Para mover tu entrevista puedo ofrecerte estas opciones.",
-            "To move your interview I can offer these options.",
-        ),
+    del lang
+    table: dict[str, str] = {
+        "offer": "I can offer these options.",
+        "reschedule_offer": "To move your interview I can offer these options.",
         "pending": (
-            "La entrevista quedó reservada en el calendario interno. "
-            "Un recruiter tiene que aprobar el correo antes de que salga. "
-            "Todavía no se envió. Cuando lo aprueben, te llega a tu casilla. "
-            "Si preferís una persona del equipo, lo pedís y listo.",
             "The interview is on the internal calendar. A recruiter has to approve "
             "the email before it goes out. Nothing was sent yet. After approval it "
-            "reaches your inbox. You can ask for a person on the team at any time.",
+            "reaches your inbox. You can ask for a person on the team at any time."
         ),
         "done": (
-            "Listo. El correo quedó en la bandeja de salida después de la aprobación. "
-            "Si querés cambiar o cancelar, lo decís.",
             "Done. The email is in the outbox after approval. "
-            "If you want to change or cancel, say so.",
+            "If you want to change or cancel, say so."
         ),
         "cancelled_done": (
-            "Listo. La entrevista quedó cancelada y el aviso "
-            "ya está en la bandeja de salida.",
-            "Done. The interview is cancelled and the notice is in the outbox.",
+            "Done. The interview is cancelled and the notice is in the outbox."
         ),
         "rejected": (
-            "El recruiter no aprobó el correo. No se envió nada "
-            "y no voy a reintentar ese envío. "
-            "Una persona del equipo te escribe para el siguiente paso.",
             "The recruiter did not approve the email. Nothing was sent "
             "and I will not retry "
-            "that send. A person on the team will write with the next step.",
+            "that send. A person on the team will write with the next step."
         ),
         "refused": (
-            "No reservé nada. Si más adelante querés un horario, escribime. "
-            "También podés pedir una persona del equipo.",
             "I did not book anything. If you want a time later, write again. "
-            "You can also ask for a person on the team.",
+            "You can also ask for a person on the team."
         ),
         "handoff": (
-            "Te paso con una persona del equipo de Taller Aurora. "
-            "No hice ninguna acción externa.",
             "I am handing this to a person on the Taller Aurora team. "
-            "I took no external action.",
+            "I took no external action."
         ),
-        "unknown": (
-            "No tengo esa información. Puedo pasarte con una persona del equipo.",
-            "I don't know that. I can hand you to a person on the team.",
-        ),
+        "unknown": "I don't know that. I can hand you to a person on the team.",
         "other": (
-            "Solo puedo hablar de tu propia entrevista. "
-            "No comparto datos de otras personas.",
             "I can only talk about your own interview. "
-            "I do not share anyone else's data.",
+            "I do not share anyone else's data."
         ),
         "kill": (
-            "La entrevista quedó reservada en el calendario interno. "
-            "Los correos externos están apagados, así que "
-            "no salió ninguna invitación.",
             "The interview is on the internal calendar. "
             "External email is switched off, "
-            "so no invitation went out.",
+            "so no invitation went out."
         ),
         "expired": (
-            "La aprobación venció. No envié el correo. "
-            "Si hace falta, una persona del equipo lo retoma.",
             "The approval expired. I did not send the email. "
-            "A person on the team can pick it up.",
+            "A person on the team can pick it up."
         ),
-        "expired_hold": (
-            "La reserva temporal venció. No quedó tomada.",
-            "The temporary hold expired. Nothing was booked.",
-        ),
+        "expired_hold": "The temporary hold expired. Nothing was booked.",
         "taken": (
-            "Ese horario se ocupó mientras lo confirmabas. No hice una reserva doble.",
-            "That time was taken while you were confirming. I did not double-book it.",
+            "That time was taken while you were confirming. I did not double-book it."
         ),
         "none": (
-            "No tengo horarios libres en esa ventana. "
-            "Te puedo pasar con una persona del equipo.",
             "I have no free times in that window. "
-            "I can hand you to a person on the team.",
+            "I can hand you to a person on the team."
         ),
         "need_yes": (
-            "Para reservar necesito un sí explícito sobre una de las opciones. "
-            "Todavía no reservé.",
             "To book I need an explicit yes on one of the options. "
-            "I have not booked yet.",
+            "I have not booked yet."
         ),
         "not_that": (
-            "Ese horario no está entre las opciones que te mostré. No reservé nada.",
-            "That time is not one of the options I showed. I did not book anything.",
+            "That time is not one of the options I showed. I did not book anything."
         ),
         "who": (
-            "¿Con quién querés entrevistarte: Ana Luz, Bruno Paz, "
-            "Camila Norte o Elena Sur?",
-            "Who do you want to meet: Ana Luz, Bruno Paz, Camila Norte or Elena Sur?",
+            "Who do you want to meet: Ana Luz, Bruno Paz, Camila Norte or Elena Sur?"
         ),
         "confirm_cancel": (
-            "Esta es tu entrevista. Respondé sí para confirmar la cancelación. "
-            "Todavía no la cancelé.",
             "This is your interview. Reply yes to confirm the cancellation. "
-            "I have not cancelled it.",
+            "I have not cancelled it."
         ),
         "no_booking": (
-            "No tengo una entrevista activa a tu nombre. No cancelé nada.",
             "I do not have an active interview under your name. "
-            "I did not cancel anything.",
+            "I did not cancel anything."
         ),
         "injection": (
-            "Ese texto pide saltear las reglas. No lo voy a hacer "
-            "y no voy a mandar correos por eso.",
             "That text asks me to skip the rules. I will not do that "
-            "and I will not send email because of it.",
+            "and I will not send email because of it."
         ),
-        "restate": (
-            "Dejo solo esta opción.",
-            "I will keep only this option.",
-        ),
-        "back_to_slot": (
-            "Cuando quieras seguimos con la entrevista.",
-            "Whenever you want, we can continue with the interview.",
-        ),
+        "restate": "I will keep only this option.",
+        "back_to_slot": "Whenever you want, we can continue with the interview.",
     }
-    spanish, english = table[key]
-    return spanish if lang == "es" else english
+    return table[key]

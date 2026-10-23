@@ -13,7 +13,7 @@ from scheduling_agent.tools import execute_tool
 EMAIL_A = {
     "booking_id": "book-a",
     "candidate_id": "cand-uno",
-    "to": "candidata.uno@mail.example",
+    "to": "candidate.one@mail.example",
     "interviewer_id": "iv-ana",
     "start": "2026-04-14T12:00:00Z",
     "timezone": "America/Argentina/Buenos_Aires",
@@ -83,7 +83,7 @@ def test_approved_hash_does_not_send_a_different_invite() -> None:
     same = execute_tool(ctx, "send_invite_email", EMAIL_A)
     assert same["executed"] is True
     assert len(ctx.outbox) == 1
-    assert ctx.outbox[0].to == "candidata.uno@mail.example"
+    assert ctx.outbox[0].to == "candidate.one@mail.example"
 
 
 def test_rejected_and_cross_candidate_calls_do_not_execute() -> None:
@@ -96,7 +96,7 @@ def test_rejected_and_cross_candidate_calls_do_not_execute() -> None:
     other = execute_tool(ctx, "get_booking", {"candidate_id": "cand-dos"})
     assert other["status"] == "REFUSED"
     assert other["executed"] is False
-    wrong_to = {**EMAIL_B, "to": "candidato.dos@mail.example"}
+    wrong_to = {**EMAIL_B, "to": "candidate.two@mail.example"}
     wrong_inbox = execute_tool(ctx, "send_invite_email", wrong_to)
     assert wrong_inbox["status"] == "REFUSED"
 

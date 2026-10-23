@@ -5,15 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-WEEKDAYS_ES = (
-    "lunes",
-    "martes",
-    "miércoles",
-    "jueves",
-    "viernes",
-    "sábado",
-    "domingo",
-)
 WEEKDAYS_EN = (
     "Monday",
     "Tuesday",
@@ -23,21 +14,6 @@ WEEKDAYS_EN = (
     "Saturday",
     "Sunday",
 )
-MONTHS_ES = {
-    "enero": 1,
-    "febrero": 2,
-    "marzo": 3,
-    "abril": 4,
-    "mayo": 5,
-    "junio": 6,
-    "julio": 7,
-    "agosto": 8,
-    "septiembre": 9,
-    "setiembre": 9,
-    "octubre": 10,
-    "noviembre": 11,
-    "diciembre": 12,
-}
 
 
 def parse_iso(value: str) -> datetime:
@@ -86,9 +62,10 @@ def parse_hhmm(value: str) -> time:
 
 
 def weekday_name(value: datetime, lang: str, zone: str) -> str:
+    """English weekday name. The dialogue language is English."""
+    del lang
     local = value.astimezone(ZoneInfo(zone))
-    names = WEEKDAYS_ES if lang == "es" else WEEKDAYS_EN
-    return names[local.weekday()]
+    return WEEKDAYS_EN[local.weekday()]
 
 
 def format_local(value: datetime, zone: str) -> tuple[str, str, str]:

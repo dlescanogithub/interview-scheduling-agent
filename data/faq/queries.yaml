@@ -1,150 +1,150 @@
 - id: q01
-  lang: es
-  text: Como hago para reprogramar una entrevista?
-  relevant:
-  - faq-reschedule-es
-- id: q02
   lang: en
   text: How do I reschedule an interview?
   relevant:
   - faq-reschedule-en
-- id: q03
-  lang: es
-  text: Quiero saber la politica para reprogramar si me surge algo
-  relevant:
-  - faq-reschedule-es
-- id: q04
+- id: q02
   lang: en
   text: What is the reschedule policy if something comes up?
   relevant:
   - faq-reschedule-en
-- id: q05
-  lang: es
-  text: Como cancelar mi entrevista y el aviso
+- id: q03
+  lang: en
+  text: Who approves the reschedule email?
   relevant:
-  - faq-cancel-es
-- id: q06
+  - faq-reschedule-en
+- id: q04
+  lang: en
+  text: Write one day ahead to move a booking
+  relevant:
+  - faq-reschedule-en
+- id: q05
   lang: en
   text: How do I cancel my interview?
   relevant:
   - faq-cancel-en
-- id: q07
-  lang: es
-  text: Necesito accesibilidad con subtitulos
+- id: q06
+  lang: en
+  text: Does a recruiter approve the cancellation notice?
   relevant:
-  - faq-accessibility-es
+  - faq-cancel-en
+- id: q07
+  lang: en
+  text: Can I cancel before the interview starts?
+  relevant:
+  - faq-cancel-en
 - id: q08
   lang: en
   text: Do you offer captions and step-free access?
   relevant:
   - faq-accessibility-en
 - id: q09
-  lang: es
-  text: Que herramienta remota usan, la Sala Aurora?
+  lang: en
+  text: Can the interview include live captions and an extra pause?
   relevant:
-  - faq-remote-es
+  - faq-accessibility-en
 - id: q10
   lang: en
   text: Which remote room do you use?
   relevant:
   - faq-remote-en
 - id: q11
-  lang: es
-  text: Que tengo que preparar para la entrevista?
+  lang: en
+  text: How do I join Sala Aurora without installing anything?
   relevant:
-  - faq-prepare-es
+  - faq-remote-en
 - id: q12
   lang: en
   text: What should I prepare for the interview?
   relevant:
   - faq-prepare-en
 - id: q13
-  lang: es
-  text: Como manejan los husos horarios?
+  lang: en
+  text: Is a long presentation required as preparation?
   relevant:
-  - faq-timezone-es
+  - faq-prepare-en
 - id: q14
   lang: en
   text: How do time zones show up on the invite?
   relevant:
   - faq-timezone-en
 - id: q15
-  lang: es
-  text: Que pasa con la privacidad de mis datos?
+  lang: en
+  text: Do you show both clocks when my zone is different?
   relevant:
-  - faq-privacy-es
+  - faq-timezone-en
 - id: q16
   lang: en
   text: What is your data privacy practice?
   relevant:
   - faq-privacy-en
 - id: q17
-  lang: es
-  text: Cuanto dura la entrevista?
+  lang: en
+  text: Do you store documents at this privacy step?
   relevant:
-  - faq-duration-es
+  - faq-privacy-en
 - id: q18
   lang: en
   text: What is the interview duration?
   relevant:
   - faq-duration-en
 - id: q19
-  lang: es
-  text: Cuando llega la devolucion del proceso?
+  lang: en
+  text: Is the interview forty-five minutes with a gap between bookings?
   relevant:
-  - faq-feedback-es
+  - faq-duration-en
 - id: q20
   lang: en
   text: When does process feedback arrive?
   relevant:
   - faq-feedback-en
 - id: q21
-  lang: es
-  text: Puedo tener la camara apagada?
+  lang: en
+  text: Does feedback arrive within a few business days?
   relevant:
-  - faq-camera-es
+  - faq-feedback-en
 - id: q22
   lang: en
   text: Can I keep the camera off?
   relevant:
   - faq-camera-en
 - id: q23
-  lang: es
-  text: Puedo ir con un acompanante o interprete?
+  lang: en
+  text: Can I start with the camera off and use audio only?
   relevant:
-  - faq-companion-es
+  - faq-camera-en
 - id: q24
-  lang: es
-  text: Que pasa si llego tarde?
-  relevant:
-  - faq-late-es
-- id: q25
   lang: en
   text: What if I am running late?
   relevant:
   - faq-late-en
+- id: q25
+  lang: en
+  text: Is being late treated as an automatic cancellation?
+  relevant:
+  - faq-late-en
 - id: q26
-  lang: es
-  text: Que cosas no hace el asistente?
+  lang: en
+  text: Can I bring a companion or an interpreter?
   relevant:
-  - faq-limits-es
+  - faq-companion-en
 - id: q27
-  lang: es
-  text: El correo de reprogramacion quien lo aprueba?
+  lang: en
+  text: Does a companion replace my own words in the interview?
   relevant:
-  - faq-reschedule-es
+  - faq-companion-en
 - id: q28
   lang: en
-  text: Does a recruiter approve the cancellation notice?
+  text: What does the assistant refuse to do?
   relevant:
-  - faq-cancel-en
+  - faq-limits-en
 - id: q29
-  lang: es
-  text: Guardan documentos en este paso de privacidad?
+  lang: en
+  text: Does the assistant hire or negotiate salary?
   relevant:
-  - faq-privacy-es
+  - faq-limits-en
 - id: q30
   lang: en
-  text: Is a long presentation required as preparation?
+  text: Can the assistant send email without a human approval?
   relevant:
-  - faq-prepare-en
+  - faq-limits-en

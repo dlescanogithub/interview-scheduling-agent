@@ -1,13 +1,13 @@
 id: accessibility_faq
 description: An accessibility question cites the FAQ or says it does not know.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools:
 - search_faq
 steps:
 - role: user
-  text: ¿Tienen accesibilidad con subtitulos para la entrevista?
+  text: Do you offer captions for the interview?
 expect:
   booked: false
   outbox_max: 0

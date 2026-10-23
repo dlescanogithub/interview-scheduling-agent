@@ -13,7 +13,6 @@ from scheduling_agent.roster import INTERVIEWERS
 from scheduling_agent.runtime import OutboxMessage, RunContext
 from scheduling_agent.timeutil import (
     WEEKDAYS_EN,
-    WEEKDAYS_ES,
     parse_iso,
     to_canonical,
 )
@@ -27,7 +26,7 @@ EFFECT_RANK = {READ: 0, INTERNAL: 1, EXTERNAL: 2}
 
 # Naive values are rejected on purpose. Do not guess UTC or Buenos Aires.
 NAIVE_DATETIME_FIX = (
-    "datetime debe incluir offset, ej. 2026-10-20T10:00:00-03:00. "
+    "A datetime must include an offset, for example 2026-10-20T10:00:00-03:00. "
     "Naive datetimes are rejected; they are not read as UTC or as Buenos Aires."
 )
 
@@ -355,7 +354,6 @@ def _slot_view(
         "candidate_tz": candidate_tz,
         "candidate_start": cand.strftime("%H:%M"),
         "candidate_end": cand_end.strftime("%H:%M"),
-        "weekday_es": WEEKDAYS_ES[local.weekday()],
         "weekday_en": WEEKDAYS_EN[local.weekday()],
     }
 

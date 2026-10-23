@@ -1,7 +1,7 @@
 id: language_switch
-description: The conversation switches from Spanish to English.
+description: An English request is confirmed by naming option 1.
 candidate_id: cand-uno
-lang: es
+lang: en
 provider: scripted
 allowed_tools:
 - list_availability
@@ -13,7 +13,7 @@ allowed_tools:
 - search_faq
 steps:
 - role: user
-  text: Hola. Quiero una entrevista con Ana Luz el 14 de abril de 2026. Zona America/Argentina/Buenos_Aires.
+  text: Hello. I want an interview with Ana Luz on April 14, 2026. My time zone is America/Argentina/Buenos_Aires.
 - role: user
   text: Yes, I confirm option 1.
 - role: recruiter

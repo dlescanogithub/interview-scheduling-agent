@@ -288,16 +288,10 @@ class Agent:
         summary = f"handoff:{reason}"
         self.ctx.trace.add("handoff", reason=reason, summary=summary)
         log_event(self.logger, 30, "handoff", self.ctx.run_id, reason=reason)
-        if self.ctx.lang == "en":
-            text = (
-                "I am handing this to a person on the Taller Aurora team. "
-                "I took no further external action."
-            )
-        else:
-            text = (
-                "Te paso con una persona del equipo de Taller Aurora. "
-                "No hago ninguna acción externa más."
-            )
+        text = (
+            "I am handing this to a person on the Taller Aurora team. "
+            "I took no further external action."
+        )
         self.ctx.trace.add(
             "assistant_message",
             text=text,
@@ -416,7 +410,7 @@ class Agent:
             return
         slot = select_slot(
             [*self.ctx.messages, {"role": "assistant", "content": text}],
-            "sí",
+            "yes",
         )
         if slot is None:
             slot = _match_listed(slots, chosen)
@@ -470,15 +464,14 @@ def _zone_feedback() -> str:
     return (
         "Rewrite the reply before the user sees it. "
         "Every clock time needs an explicit zone and offset, "
-        "for example 1) mar 20/10 10:00 (ART, UTC-3). "
+        "for example 1) Tue 20/10 10:00 (ART, UTC-3). "
         "A bare time is invalid. If the user already confirmed, use pending_slot."
     )
 
 
 def _unzoned_fallback(lang: str) -> str:
-    if lang == "en":
-        return "I cannot show a time without its zone. I have not booked anything."
-    return "No puedo mostrar un horario sin la zona. No reservé nada."
+    del lang
+    return "I cannot show a time without its zone. I have not booked anything."
 
 
 def _system_prompt(ctx: RunContext) -> str:
@@ -504,11 +497,11 @@ def _system_prompt(ctx: RunContext) -> str:
         "Naive datetimes are rejected. 2026-04-14T00:00:00 is invalid.",
         "Example of a valid datetime: 2026-10-20T10:00:00-03:00.",
         "Offer at most 3 numbered slots, one per line, in this exact form:",
-        "1) mar 20/10 10:00 (ART, UTC-3)",
+        "1) Tue 20/10 10:00 (ART, UTC-3)",
         "Every clock time shown to the user uses that form, with ART or UTC",
         "and a numeric offset such as UTC-3 or UTC+0. A bare 10:00 is invalid.",
         "A short confirmation accepts pending_slot. Do not ask again.",
-        "Short confirmations: Sí, confirmo; sí; la 1; opción 1; ese.",
+        "Short confirmations: Yes, I confirm; yes; option 1; that one.",
         "When pending_slot is not none and the user sends one of those,",
         "hold_slot and book_slot that exact start and end.",
         render_pending_slot(ctx.pending_slot, ctx.pending_index),
@@ -543,9 +536,8 @@ def _system_prompt(ctx: RunContext) -> str:
 
 
 def _no_pending(lang: str) -> str:
-    if lang == "en":
-        return "There is nothing waiting for recruiter approval."
-    return "No hay nada esperando la aprobación de un recruiter."
+    del lang
+    return "There is nothing waiting for recruiter approval."
 
 
 def micro_cap(settings: Settings) -> int:

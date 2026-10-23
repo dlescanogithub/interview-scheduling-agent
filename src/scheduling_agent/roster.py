@@ -29,18 +29,18 @@ INTERVIEWERS: Final[dict[str, dict[str, str]]] = {
 
 CANDIDATES: Final[dict[str, dict[str, str]]] = {
     "cand-uno": {
-        "name": "Candidata Uno",
-        "email": "candidata.uno@mail.example",
+        "name": "Candidate One",
+        "email": "candidate.one@mail.example",
         "timezone": "America/Argentina/Buenos_Aires",
     },
     "cand-dos": {
-        "name": "Candidato Dos",
-        "email": "candidato.dos@mail.example",
+        "name": "Candidate Two",
+        "email": "candidate.two@mail.example",
         "timezone": "UTC",
     },
     "cand-tres": {
-        "name": "Candidata Tres",
-        "email": "candidata.tres@mail.example",
+        "name": "Candidate Three",
+        "email": "candidate.three@mail.example",
         "timezone": "America/New_York",
     },
 }

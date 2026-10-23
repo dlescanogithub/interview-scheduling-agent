@@ -6,11 +6,11 @@ Accepted
 
 ## Context
 
-On 2026-10-17 a third live check ran `happy_path` three times. None of them booked. The simulated user said only "Sí, confirmo." and the model asked again. All three runs violated `times_include_timezone` because the listed times had no zone.
+On 2026-10-17 a third live check ran `happy_path` three times. None of them booked. The simulated user said only "Yes, I confirm." (that run used the previous Spanish wording of that sentence) and the model asked again. All three runs violated `times_include_timezone` because the listed times had no zone.
 
 ## Decision
 
-Offer at most three numbered slots in one form: `1) mar 20/10 10:00 (ART, UTC-3)`. Store the offered slot on the run as `pending_slot` and repeat that line in the system prompt. A short confirmation accepts that slot and is not asked again.
+Offer at most three numbered slots in one form: `1) Tue 20/10 10:00 (ART, UTC-3)`. Store the offered slot on the run as `pending_slot` and repeat that line in the system prompt. A short confirmation accepts that slot and is not asked again.
 
 If a reply contains a clock time and is missing a zone or a numeric offset, do not show it. Send the model a rewrite instruction, at most twice, and then a sentence that contains no clock time.
 

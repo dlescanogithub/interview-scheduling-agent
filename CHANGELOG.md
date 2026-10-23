@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add narrated English demo video (`interview_scheduling_agent_demo_en.mp4`) with subtitles and evidence pack under `docs/demo/`.
+
 ## 0.1.1 - 2026-10-22
 
 - Docs for readers outside the lab. `SECURITY.md` tells reporters to use GitHub private vulnerability reporting ("Report a vulnerability" on the Security tab). `docs/HOW_IT_WORKS.md` is an English walkthrough for engineers and buyers. The README docs table uses that description. `.gitleaksignore` names the `docs/PROVENANCE.md` sha256 line that gitleaks flags as `generic-api-key`.

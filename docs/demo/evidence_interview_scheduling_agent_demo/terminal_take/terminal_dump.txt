@@ -1,0 +1,66 @@
+sched $ python -m scheduling_agent demo > /tmp/sched_demo.txt; sed -n '1,20p' /tmp/sched_demo.txt
+# scripted transcript
+
+[user] Hello, I am Candidate One. I want an interview with Ana Luz on April 14, 2026. My time zone is America/Argentina/Buenos_Aires.
+
+[assistant calls] [{'id': 'call-0001', 'name': 'list_availability', 'arguments': {'interviewer_id': 'iv-ana', 'range_start': '2026-04-14T03:00:00Z', 'range_end': '2026-04-15T03:00:00Z', 'candidate_tz': 'America/Argentina/Buenos_Aires', 'duration_minutes': 45, 'limit': 3}, 'origin': 'policy'}]
+
+[tool] {"name": "list_availability", "effect_class": "read", "status": "OK", "executed": true, "origin": "policy", "param_hash": "6f9f15da65c21b4057296816afbb33e7be2e7785a53def694f5ca86858b0f6eb", "approval_id": "", "output": {"slots": [{"interviewer_id": "iv-ana", "interviewer_name": "Ana Luz", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z", "duration_minutes": 45, "local_date": "2026-04-14", "local_start": "09:00", "local_end": "09:45", "interviewer_tz": "America/Argentina/Buenos_Aires", "candidate_tz": "America/Argentina/Buenos_Aires", "candidate_start": "09:00", "candidate_end": "09:45", "weekday_en": "Tuesday"}, {"interviewer_id": "iv-ana", "interviewer_name": "Ana Luz", "start": "2026-04-14T13:00:00Z", "end": "2026-04-14T13:45:00Z", "duration_minutes": 45, "local_date": "2026-04-14", "local_start": "10:00", "local_end": "10:45", "interviewer_tz": "America/Argentina/Buenos_Aires", "candidate_tz": "America/Argentina/Buenos_Aires", "candidate_start": "10:00", "candidate_end": "10:45", "weekday_en": "Tuesday"}, {"interviewer_id": "iv-ana", "interviewer_name": "Ana Luz", "start": "2026-04-14T14:00:00Z", "end": "2026-04-14T14:45:00Z", "duration_minutes": 45, "local_date": "2026-04-14", "local_start": "11:00", "local_end": "11:45", "interviewer_tz": "America/Argentina/Buenos_Aires", "candidate_tz": "America/Argentina/Buenos_Aires", "candidate_start": "11:00", "candidate_end": "11:45", "weekday_en": "Tuesday"}], "widened": false}, "args": {"interviewer_id": "iv-ana", "range_start": "2026-04-14T03:00:00Z", "range_end": "2026-04-15T03:00:00Z", "candidate_tz": "America/Argentina/Buenos_Aires", "duration_minutes": 45, "limit": 3}}
+[assistant] I can offer these options.
+1) Tue 14/04 09:00 (ART, UTC-3) | Ana Luz | 45 min
+2) Tue 14/04 10:00 (ART, UTC-3) | Ana Luz | 45 min
+3) Tue 14/04 11:00 (ART, UTC-3) | Ana Luz | 45 min
+Reply yes to confirm option 1.
+
+[user] Yes, I confirm.
+
+[assistant calls] [{'id': 'call-0002', 'name': 'hold_slot', 'arguments': {'interviewer_id': 'iv-ana', 'candidate_id': 'cand-one', 'start': '2026-04-14T12:00:00Z', 'end': '2026-04-14T12:45:00Z'}, 'origin': 'policy'}]
+
+[tool] {"name": "hold_slot", "effect_class": "internal_reversible", "status": "OK", "executed": true, "origin": "policy", "param_hash": "721a524d51cacacf50720c93e162010d0748e4a1184e9b66932eee34b480a94f", "approval_id": "", "output": {"hold_id": "hold-0001", "interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z", "expires_at": "2026-04-13T12:15:00Z"}, "args": {"interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z"}}
+[assistant calls] [{'id': 'call-0003', 'name': 'book_slot', 'arguments': {'hold_id': 'hold-0001', 'candidate_id': 'cand-one', 'interviewer_id': 'iv-ana', 'start': '2026-04-14T12:00:00Z', 'end': '2026-04-14T12:45:00Z'}, 'origin': 'policy'}]
+
+sched $ clear
+[H[2J[3Jsched $ sed -n '1,22p' /tmp/sched_demo.txt
+# scripted transcript
+
+[user] Hello, I am Candidate One. I want an interview with Ana Luz on April 14, 2026. My time zone is America/Argentina/Buenos_Aires.
+
+[assistant calls] [{'id': 'call-0001', 'name': 'list_availability', 'arguments': {'interviewer_id': 'iv-ana', 'range_start': '2026-04-14T03:00:00Z', 'range_end': '2026-04-15T03:00:00Z', 'candidate_tz': 'America/Argentina/Buenos_Aires', 'duration_minutes': 45, 'limit': 3}, 'origin': 'policy'}]
+
+[tool] {"name": "list_availability", "effect_class": "read", "status": "OK", "executed": true, "origin": "policy", "param_hash": "6f9f15da65c21b4057296816afbb33e7be2e7785a53def694f5ca86858b0f6eb", "approval_id": "", "output": {"slots": [{"interviewer_id": "iv-ana", "interviewer_name": "Ana Luz", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z", "duration_minutes": 45, "local_date": "2026-04-14", "local_start": "09:00", "local_end": "09:45", "interviewer_tz": "America/Argentina/Buenos_Aires", "candidate_tz": "America/Argentina/Buenos_Aires", "candidate_start": "09:00", "candidate_end": "09:45", "weekday_en": "Tuesday"}, {"interviewer_id": "iv-ana", "interviewer_name": "Ana Luz", "start": "2026-04-14T13:00:00Z", "end": "2026-04-14T13:45:00Z", "duration_minutes": 45, "local_date": "2026-04-14", "local_start": "10:00", "local_end": "10:45", "interviewer_tz": "America/Argentina/Buenos_Aires", "candidate_tz": "America/Argentina/Buenos_Aires", "candidate_start": "10:00", "candidate_end": "10:45", "weekday_en": "Tuesday"}, {"interviewer_id": "iv-ana", "interviewer_name": "Ana Luz", "start": "2026-04-14T14:00:00Z", "end": "2026-04-14T14:45:00Z", "duration_minutes": 45, "local_date": "2026-04-14", "local_start": "11:00", "local_end": "11:45", "interviewer_tz": "America/Argentina/Buenos_Aires", "candidate_tz": "America/Argentina/Buenos_Aires", "candidate_start": "11:00", "candidate_end": "11:45", "weekday_en": "Tuesday"}], "widened": false}, "args": {"interviewer_id": "iv-ana", "range_start": "2026-04-14T03:00:00Z", "range_end": "2026-04-15T03:00:00Z", "candidate_tz": "America/Argentina/Buenos_Aires", "duration_minutes": 45, "limit": 3}}
+[assistant] I can offer these options.
+1) Tue 14/04 09:00 (ART, UTC-3) | Ana Luz | 45 min
+2) Tue 14/04 10:00 (ART, UTC-3) | Ana Luz | 45 min
+3) Tue 14/04 11:00 (ART, UTC-3) | Ana Luz | 45 min
+Reply yes to confirm option 1.
+
+[user] Yes, I confirm.
+
+[assistant calls] [{'id': 'call-0002', 'name': 'hold_slot', 'arguments': {'interviewer_id': 'iv-ana', 'candidate_id': 'cand-one', 'start': '2026-04-14T12:00:00Z', 'end': '2026-04-14T12:45:00Z'}, 'origin': 'policy'}]
+
+[tool] {"name": "hold_slot", "effect_class": "internal_reversible", "status": "OK", "executed": true, "origin": "policy", "param_hash": "721a524d51cacacf50720c93e162010d0748e4a1184e9b66932eee34b480a94f", "approval_id": "", "output": {"hold_id": "hold-0001", "interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z", "expires_at": "2026-04-13T12:15:00Z"}, "args": {"interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z"}}
+[assistant calls] [{'id': 'call-0003', 'name': 'book_slot', 'arguments': {'hold_id': 'hold-0001', 'candidate_id': 'cand-one', 'interviewer_id': 'iv-ana', 'start': '2026-04-14T12:00:00Z', 'end': '2026-04-14T12:45:00Z'}, 'origin': 'policy'}]
+
+[tool] {"name": "book_slot", "effect_class": "internal_reversible", "status": "OK", "executed": true, "origin": "policy", "param_hash": "153ca35b5f7a045a05866e95df22563767f6cc47add6f36a7b698a9ba7723af0", "approval_id": "", "output": {"booking_id": "book-0002", "interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z", "hold_id": "hold-0001"}, "args": {"hold_id": "hold-0001", "candidate_id": "cand-one", "interviewer_id": "iv-ana", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z"}}
+[assistant calls] [{'id': 'call-0004', 'name': 'send_invite_email', 'arguments': {'booking_id': 'book-0002', 'candidate_id': 'cand-one', 'to': 'candidate.one@mail.example', 'interviewer_id': 'iv-ana', 'start': '2026-04-14T12:00:00Z', 'timezone': 'America/Argentina/Buenos_Aires'}, 'origin': 'policy'}]
+sched $ clear
+[H[2J[3Jsched $ grep -E 'PENDING_APPROVAL|book_slot|hold_slot|send_invite' /tmp/sched_demo.txt | head -20
+[assistant calls] [{'id': 'call-0002', 'name': 'hold_slot', 'arguments': {'interviewer_id': 'iv-ana', 'candidate_id': 'cand-one', 'start': '2026-04-14T12:00:00Z', 'end': '2026-04-14T12:45:00Z'}, 'origin': 'policy'}]
+[tool] {"name": "hold_slot", "effect_class": "internal_reversible", "status": "OK", "executed": true, "origin": "policy", "param_hash": "721a524d51cacacf50720c93e162010d0748e4a1184e9b66932eee34b480a94f", "approval_id": "", "output": {"hold_id": "hold-0001", "interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z", "expires_at": "2026-04-13T12:15:00Z"}, "args": {"interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z"}}
+[assistant calls] [{'id': 'call-0003', 'name': 'book_slot', 'arguments': {'hold_id': 'hold-0001', 'candidate_id': 'cand-one', 'interviewer_id': 'iv-ana', 'start': '2026-04-14T12:00:00Z', 'end': '2026-04-14T12:45:00Z'}, 'origin': 'policy'}]
+[tool] {"name": "book_slot", "effect_class": "internal_reversible", "status": "OK", "executed": true, "origin": "policy", "param_hash": "153ca35b5f7a045a05866e95df22563767f6cc47add6f36a7b698a9ba7723af0", "approval_id": "", "output": {"booking_id": "book-0002", "interviewer_id": "iv-ana", "candidate_id": "cand-one", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z", "hold_id": "hold-0001"}, "args": {"hold_id": "hold-0001", "candidate_id": "cand-one", "interviewer_id": "iv-ana", "start": "2026-04-14T12:00:00Z", "end": "2026-04-14T12:45:00Z"}}
+[assistant calls] [{'id': 'call-0004', 'name': 'send_invite_email', 'arguments': {'booking_id': 'book-0002', 'candidate_id': 'cand-one', 'to': 'candidate.one@mail.example', 'interviewer_id': 'iv-ana', 'start': '2026-04-14T12:00:00Z', 'timezone': 'America/Argentina/Buenos_Aires'}, 'origin': 'policy'}]
+[tool] {"name": "send_invite_email", "effect_class": "external", "status": "PENDING_APPROVAL", "executed": false, "origin": "policy", "param_hash": "bd3155bcfcf094e8b860b08900d0cac14e81d716a116d35f16ea3e8105a10c6c", "approval_id": "appr-0003", "output": {"approval_id": "appr-0003", "detail": "pending_approval"}, "args": {"booking_id": "book-0002", "candidate_id": "cand-one", "to": "candidate.one@mail.example", "interviewer_id": "iv-ana", "start": "2026-04-14T12:00:00Z", "timezone": "America/Argentina/Buenos_Aires"}}
+[recruiter] recruiter_decision=approve approval_id=appr-0003 param_hash=bd3155bcfcf094e8b860b08900d0cac14e81d716a116d35f16ea3e8105a10c6c tool=send_invite_email
+[tool] {"name": "send_invite_email", "effect_class": "external", "status": "OK", "executed": true, "origin": "approval", "param_hash": "bd3155bcfcf094e8b860b08900d0cac14e81d716a116d35f16ea3e8105a10c6c", "approval_id": "appr-0003", "output": {"outbox_id": "out-0004", "kind": "invite"}, "args": {"booking_id": "book-0002", "candidate_id": "cand-one", "to": "candidate.one@mail.example", "interviewer_id": "iv-ana", "start": "2026-04-14T12:00:00Z", "timezone": "America/Argentina/Buenos_Aires"}}
+sched $ clear
+[H[2J[3Jsched $ tail -8 /tmp/sched_demo.txt
+[assistant] The interview is on the internal calendar. A recruiter has to approve the email before it goes out. Nothing was sent yet. After approval it reaches your inbox. You can ask for a person on the team at any time.
+
+[recruiter] recruiter_decision=approve approval_id=appr-0003 param_hash=bd3155bcfcf094e8b860b08900d0cac14e81d716a116d35f16ea3e8105a10c6c tool=send_invite_email
+[tool] {"name": "send_invite_email", "effect_class": "external", "status": "OK", "executed": true, "origin": "approval", "param_hash": "bd3155bcfcf094e8b860b08900d0cac14e81d716a116d35f16ea3e8105a10c6c", "approval_id": "appr-0003", "output": {"outbox_id": "out-0004", "kind": "invite"}, "args": {"booking_id": "book-0002", "candidate_id": "cand-one", "to": "candidate.one@mail.example", "interviewer_id": "iv-ana", "start": "2026-04-14T12:00:00Z", "timezone": "America/Argentina/Buenos_Aires"}}
+[assistant] Done. The email is in the outbox after approval. If you want to change or cancel, say so.
+
+# trace kinds: user_message,tool_result,assistant_message,user_message,confirmation,tool_result,tool_result,tool_result,assistant_message,approval_decision,tool_result,assistant_message,calendar_snapshot,budget,session,terminal
+terminal=completed outbox=1 booked=1
+sched $ 

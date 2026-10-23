@@ -1,0 +1,47 @@
+1
+00:00:00,940 --> 00:00:05,340
+A scripted scheduler for Taller Aurora, a fictional hiring co-op.
+
+2
+00:00:05,370 --> 00:00:10,810
+A slot books only after the candidate confirms that exact slot. Offline. No
+key.
+
+3
+00:00:12,040 --> 00:00:18,030
+Candidate One asks for Ana Luz on April fourteenth twenty twenty-six, Buenos
+Aires time.
+
+4
+00:00:18,060 --> 00:00:22,570
+Three options. Candidate confirms option one: nine o'clock.
+
+5
+00:00:23,840 --> 00:00:31,660
+Hold, then book on the internal calendar. The invite email stays
+PENDING_APPROVAL. Nothing was sent yet.
+
+6
+00:00:32,930 --> 00:00:39,400
+A simulated recruiter approves that same call. Outbox one, booked one,
+terminal completed.
+
+7
+00:00:39,460 --> 00:00:44,600
+An approval of ten o'clock would not cover eleven. The hash binds tool and
+arguments.
+
+8
+00:00:45,750 --> 00:00:50,800
+The expensive mistakes are a wrong slot and an invite that leaves before
+anyone approves.
+
+9
+00:00:50,850 --> 00:00:59,590
+Not covered: a real calendar, an authenticated recruiter channel, or live
+model quality. Live mode on this revision is UNVERIFIED.
+
+10
+00:00:59,620 --> 00:01:05,420
+Run python -m scheduling_agent demo. Lab path cost: zero.
+

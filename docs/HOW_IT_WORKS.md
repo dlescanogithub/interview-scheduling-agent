@@ -2,6 +2,8 @@
 
 This is a lab with invented data for Taller Aurora, a fictional co-op. The "brain" that runs in CI is a script, not a model. It shows the tools, the gates, and the rules. It does not show the quality of a model.
 
+The same measured numbers are in the README. The hours model is in `docs/BUSINESS_VALUE.md`.
+
 ## What was measured on 2026-10-23
 
 **MEASURED** on 2026-10-23, Python 3.12.3, pytest 9.1.1, package `scheduling_agent` 0.1.1, code revision `0204f8b` (the docs commit that cites this revision does not change the package). `python3 -m pytest`: 125 passed. Statement coverage: 94.12% (2754 of 2926). `percent_statements_covered` is 94.12166780587833. The total pytest-cov prints, which mixes statements and branches because branch coverage is on, is 91.02% (`percent_covered` 91.01601601601601). Branch coverage on that run is 82.52% (883 of 1070 branches; 157 partial; `percent_branches_covered` 82.5233644859813). `python3 -m scheduling_agent eval`: 26/26, 0 violations. `python3 -m scheduling_agent eval --regression`: exit code 1 and 54 violations (26 confirmation, 25 approval, 2 send-claim lines on `kill_switch`, 1 safe-state). Simulated users on that run: mean turns to booking 2.25, mean clarifications per booking 0.00, clarify messages 2, handoff rate 0.08 (2 of 26). Retrieval on the English labels written with the corpus: hit@1 30/30, hit@3 30/30, bootstrap 95% [1.000, 1.000].

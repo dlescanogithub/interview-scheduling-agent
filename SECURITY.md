@@ -4,7 +4,7 @@ This repository is a synthetic lab. It does not connect to a real calendar or a 
 
 ## Reporting
 
-Open a private security advisory on the repository, or contact the owner listed in `.github/CODEOWNERS`. Do not open a public issue that includes a credential, a trace, or a live ledger.
+Use GitHub private vulnerability reporting. On the Security tab, choose "Report a vulnerability". You can also contact the owner listed in `.github/CODEOWNERS`. Do not open a public issue that includes a credential, a trace, or a live ledger.
 
 ## Secrets
 

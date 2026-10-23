@@ -1,0 +1,3 @@
+# sha256 of vendored secretscan.py on docs/PROVENANCE.md line 5.
+# gitleaks rule generic-api-key matches that hex. This line only.
+docs/PROVENANCE.md:generic-api-key:5

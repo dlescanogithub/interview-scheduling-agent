@@ -1,0 +1,22 @@
+[
+ {
+  "id": "A_hook",
+  "text": "A scripted scheduler for Taller Aurora, a fictional hiring co-op. A slot books only after the candidate confirms that exact slot. Offline. No key."
+ },
+ {
+  "id": "B_demo",
+  "text": "Candidate One asks for Ana Luz on April fourteenth twenty twenty-six, Buenos Aires time. Three options. Candidate confirms option one: nine o'clock."
+ },
+ {
+  "id": "C_gate",
+  "text": "Hold, then book on the internal calendar. The invite email stays PENDING_APPROVAL. Nothing was sent yet."
+ },
+ {
+  "id": "D_outbox",
+  "text": "A simulated recruiter approves that same call. Outbox one, booked one, terminal completed. An approval of ten o'clock would not cover eleven. The hash binds tool and arguments."
+ },
+ {
+  "id": "E_close",
+  "text": "The expensive mistakes are a wrong slot and an invite that leaves before anyone approves. Not covered: a real calendar, an authenticated recruiter channel, or live model quality. Live mode on this revision is UNVERIFIED. Run python -m scheduling_agent demo. Lab path cost: zero."
+ }
+]

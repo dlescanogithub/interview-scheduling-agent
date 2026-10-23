@@ -4,6 +4,7 @@
 
 This lab proves the gates around a scripted scheduler: a slot is booked only after the candidate confirms that exact slot, and an invite stays in an in-memory outbox until a recruiter approves that same call. It does not prove model quality. Live mode on this revision is **UNVERIFIED**.
 Offline demo, no key and no network: `python3 -m scheduling_agent demo`
+- **Demo video (English, offline):** [docs/demo/README.md](docs/demo/README.md) — [`interview_scheduling_agent_demo_en.mp4`](docs/demo/interview_scheduling_agent_demo_en.mp4)
 Walkthrough and limits: [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md).
 
 Taller Aurora, the hiring co-op in the fixtures, is fictional. The brain that runs in CI and in `demo` is a scripted provider. Tests clear `LIVE_LLM`, `LLM_*`, `XAI_API_KEY`, and `MAX_LIVE_SPEND_USD`, and a socket guard fails the run if a test opens a connection.
@@ -252,6 +253,7 @@ A naive datetime such as `2026-04-14T00:00:00` is rejected. It is not read as UT
 
 | Doc | What it is for |
 | --- | --- |
+| [docs/demo/README.md](docs/demo/README.md) | Demo video (English, offline) |
 | [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) | Walkthrough for engineers and buyers |
 | [docs/BUSINESS_VALUE.md](docs/BUSINESS_VALUE.md) | Value plan inside the repo's own [EST] hours model |
 | [docs/BUSINESS_CASE.md](docs/BUSINESS_CASE.md) | Recruiter-hours formula, all figures [EST], no wage |

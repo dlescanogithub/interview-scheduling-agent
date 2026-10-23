@@ -40,7 +40,7 @@ def _settings(**overrides: object) -> Settings:
     return Settings(**base)  # type: ignore[arg-type]
 
 
-def _request(text: str = "hola") -> CompletionRequest:
+def _request(text: str = "hello") -> CompletionRequest:
     return CompletionRequest(messages=[{"role": "user", "content": text}], tools=[])
 
 
@@ -188,7 +188,7 @@ def test_cached_price_discounts_reported_usage(tmp_path: Path) -> None:
         transport,
         ledger,
     )
-    provider.complete(_request("hola"))
+    provider.complete(_request("hello"))
     assert ledger.rows[0]["cached_tokens"] == 24576
     assert ledger.rows[0]["cost_usd"] == round(discounted, 8)
 
@@ -207,7 +207,7 @@ def test_cached_price_discounts_reported_usage(tmp_path: Path) -> None:
         ),
         SpendLedger(tmp_path / "plain.jsonl"),
     )
-    plain.complete(_request("hola"))
+    plain.complete(_request("hello"))
     assert plain.ledger.rows[0]["cost_usd"] == round(full, 8)
 
 

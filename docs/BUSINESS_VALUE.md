@@ -108,7 +108,7 @@ What a team would still have to measure, because this repo does not:
 | Do recruiters actually spend 4 minutes, or do they re-check the calendar? | The 4 minutes are [EST]. Approval latency is not measured |
 | How many candidates a month, and how many messages? | 40 and about 6 messages are [EST] |
 | Does a wrong invite still get through once a real mailbox exists? | The harness wrong-slot count is not a workplace rate. The business case says not to claim a model reduces wrong invites |
-| Does the send-claim check catch a live model's wording, including `ningún` / `nada`? | Recall after that change is not measured. Earlier sets are small and not comparable with each other |
+| Does the send-claim check catch a live model's English wording? | The 2026-10-17 recall figures were measured on the previous Spanish wording. No new n=20 recall was run for the English detector. Earlier sets are small and not comparable with each other |
 | What does a live run on this revision cost and pass? | **UNVERIFIED**. The 2026-10-17 sample is a different tree |
 | Is the candidate who is speaking authenticated? | Out of scope. The session is assumed to know |
 | Accessibility and load | Design only. Not tested with people |
@@ -125,7 +125,7 @@ Qualitative labels come from [RISKS.md](RISKS.md). No probabilities were measure
 | The 4 minutes are optimistic | If approval takes 15 minutes, the [EST] difference shrinks. The repo states that and does not publish a replacement total | Discovery question 4 |
 | Simulated approval mistaken for a person | The demo and the scenario inject the recruiter decision. Certain in this repo | Copy in the README. Offline check on 2026-10-17: no human-gate bypass in 11 cases (small n) |
 | Over-trust in the scripted brain | Someone reads 26/26 or 15/15 as model quality | CI brain is the scripted provider. Live on this revision is UNVERIFIED. 15/15 does not prove the model retries the tool |
-| Send-claim misses | The model can say the mail went out while the outbox is empty | Heuristic, with the limits in the README. Recall after `ningún` / `nada` is not measured |
+| Send-claim misses | The model can say the mail went out while the outbox is empty | Heuristic, with the limits in the README. The 2026-10-17 recall was measured on the previous Spanish wording. The English detector has no new n=20 recall |
 | Cross-candidate mention the check misses | An obfuscated address, a spaced address, or a first name alone | Direct name, address, and id are checked. The misses are documented. Offline on 2026-10-17: 6/6 direct leaks, 3 clean controls, small n |
 | Double booking if a second writer bypasses the mock | The hours model assumes one calendar | Overlap check inside the mock, including the buffer, and an invariant on the final snapshot |
 | Time-zone error | A candidate in another zone confirms the wrong clock | Every time shown to the user includes a zone. Naive datetimes are rejected |
@@ -138,7 +138,8 @@ Not covered, and not given a probability here: a review of a real identity provi
 
 **MEASURED**
 
-- 2026-10-22, Python 3.12.3, pytest 9.1.1, code revision `25ad14d`: 124 passed; line coverage 93.95% (2780 of 2959 statements); pytest-cov total including branches 90.79%; eval 26/26 with 0 violations; regression exit 1 with 54 violations; ruff and mypy clean; secret scan with no findings. The same run's simulated-user and retrieval lines match the latest 26-scenario record.
+- 2026-10-23, Python 3.12.3, pytest 9.1.1, package 0.1.1, code revision `0204f8b`: 125 passed; line coverage 94.12% (2754 of 2926 statements); pytest-cov total including branches 91.02%; eval 26/26 with 0 violations; regression exit 1 with 54 violations; ruff and mypy clean; secret scan with no findings. Simulated users: mean turns to booking 2.25, clarify messages 2, handoff rate 0.08 (2 of 26). Retrieval on the English corpus: hit@1 30/30, hit@3 30/30.
+- 2026-10-22, Python 3.12.3, pytest 9.1.1, code revision `25ad14d`: 124 passed; line coverage 93.95% (2780 of 2959 statements); pytest-cov total including branches 90.79%; eval 26/26 with 0 violations; regression exit 1 with 54 violations. Previous data, on the tree before the English-only change.
 - 2026-10-17 scripted history in [METRICS.md](METRICS.md), including the earlier 25/25 gate and the test counts from 86 passed upward. Those commits are not re-labeled as today's run.
 - 2026-10-17 live samples in [COST.md](COST.md) and the README: the path from the incomplete n=8 to 15/15 PASS with a simulated approval, the aborted caps, the token counts that were recorded, and the ones that were not.
 - Heuristic checks on fixed lists, with n and the commit named next to each rate. They are small samples, not a trend.
@@ -147,7 +148,7 @@ Not covered, and not given a probability here: a review of a real identity provi
 
 - A wage, a currency ROI, a vendor price list, and any cost other than the recorded live ticks plus the simulated 0.
 - Approval latency, recruiter minutes on a real queue, and wrong-invite counts outside the scripted gate.
-- Live mode on this revision, including whether the model retries the tool and whether the send-claim recall holds after `ningún` / `nada`.
+- Live mode on this revision, including whether the model retries the tool. The English send-claim detector has no new n=20 recall. The 2026-10-17 rates were measured on the previous Spanish wording.
 - Generalization of the FAQ retrieval. The labels were written with the corpus.
 - Accessibility, load, wall-clock latency, a real calendar, a real mailbox, and candidate authentication.
-- Docker image build on 2026-10-22.
+- Docker image build on 2026-10-23.

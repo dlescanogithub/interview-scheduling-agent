@@ -36,7 +36,7 @@ def test_roster_matches_the_calendar_fixture() -> None:
 def test_time_helpers_and_clocks() -> None:
     instant = parse_iso("2026-04-14T12:00:00Z")
     assert to_canonical(instant) == "2026-04-14T12:00:00Z"
-    assert weekday_name(instant, "es", "America/Argentina/Buenos_Aires") == "martes"
+    assert weekday_name(instant, "en", "America/Argentina/Buenos_Aires") == "Tuesday"
     date_text, hhmm, weekday = format_local(instant, "UTC")
     assert date_text == "2026-04-14"
     assert hhmm == "12:00"

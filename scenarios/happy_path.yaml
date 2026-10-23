@@ -1,7 +1,7 @@
 id: happy_path
 description: Book with an explicit yes and a recruiter-approved invite.
-candidate_id: cand-uno
-lang: es
+candidate_id: cand-one
+lang: en
 provider: scripted
 allowed_tools:
 - list_availability
@@ -13,10 +13,10 @@ allowed_tools:
 - search_faq
 steps:
 - role: user
-  text: Hola, soy Candidata Uno. Quiero una entrevista con Ana Luz el 14 de abril
-    de 2026. Mi zona es America/Argentina/Buenos_Aires.
+  text: Hello, I am Candidate One. I want an interview with Ana Luz on April 14,
+    2026. My time zone is America/Argentina/Buenos_Aires.
 - role: user
-  text: Sí, confirmo.
+  text: Yes, I confirm.
 - role: recruiter
   decision: approve
 expect:

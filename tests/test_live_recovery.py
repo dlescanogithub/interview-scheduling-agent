@@ -125,7 +125,7 @@ def test_fake_transport_recovers_after_naive_and_unknown_id(tmp_path: Path) -> N
         _call("list_availability", json.dumps(NAIVE_ARGS), "call-naive"),
         _call("list_availability", json.dumps(UNKNOWN_ARGS), "call-unknown"),
         _call("list_availability", json.dumps(VALID_ARGS), "call-ok"),
-        _text("Puedo ofrecer horarios de Ana Luz. Respondé sí para confirmar."),
+        _text("I can offer times with Ana Luz. Reply yes to confirm."),
     ]
     transport = ScriptTransport(steps)
     ctx = make_ctx()
@@ -136,7 +136,7 @@ def test_fake_transport_recovers_after_naive_and_unknown_id(tmp_path: Path) -> N
         clock=ctx.clock,
     )
     agent = Agent(ctx, provider)
-    agent.handle_user("Quiero una entrevista con Ana Luz.")
+    agent.handle_user("I want an interview with Ana Luz.")
     assert len(transport.bodies) == 4
     prompt = str(transport.bodies[0]["messages"][0]["content"])
     assert "America/Argentina/Buenos_Aires" in prompt
@@ -161,7 +161,7 @@ def test_fake_transport_recovers_after_naive_and_unknown_id(tmp_path: Path) -> N
 def test_invalid_json_is_returned_to_the_model(tmp_path: Path) -> None:
     steps = [
         _call("list_availability", "{not-json", "call-bad"),
-        _text("El argumento no era JSON. No reservé nada."),
+        _text("The argument was not JSON. I did not book anything."),
     ]
     transport = ScriptTransport(steps)
     ctx = make_ctx()
@@ -171,7 +171,7 @@ def test_invalid_json_is_returned_to_the_model(tmp_path: Path) -> None:
         SpendLedger(tmp_path / "ledger.jsonl"),
         clock=ctx.clock,
     )
-    Agent(ctx, provider).handle_user("hola")
+    Agent(ctx, provider).handle_user("hello")
     echoed = _tool_texts(transport.bodies[1])[0]
     assert "invalid_json" in echoed
     assert "2026-10-20T10:00:00-03:00" in echoed
@@ -180,7 +180,7 @@ def test_invalid_json_is_returned_to_the_model(tmp_path: Path) -> None:
 def test_empty_invariant_pass_is_not_pass() -> None:
     class Talk:
         def complete(self, request: CompletionRequest) -> CompletionResponse:
-            return CompletionResponse(text="No reservé nada.", purpose="talk")
+            return CompletionResponse(text="I did not book anything.", purpose="talk")
 
     root = find_root()
     scenario = next(
@@ -223,5 +223,5 @@ def test_prompt_round_trip_keeps_the_session_header() -> None:
 
     ctx = make_ctx()
     view = parse_session([{"role": "system", "content": _system_prompt(ctx)}])
-    assert view.candidate_id == "cand-uno"
+    assert view.candidate_id == "cand-one"
     assert view.now.year == 2026

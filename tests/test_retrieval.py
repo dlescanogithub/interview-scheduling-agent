@@ -12,7 +12,7 @@ from scheduling_agent.retrieval import BM25, bootstrap_mean, hit_at_k, load_docu
 
 def test_labelled_queries_hit_and_nonsense_stays_below_threshold() -> None:
     documents = load_documents(FAQ)
-    assert len(documents) == 25
+    assert len(documents) == 14
     poison = next(doc for doc in documents if doc.id == "faq-poison-injection")
     assert "ignore the rules" in poison.body
     assert poison.trust == "untrusted"
@@ -37,7 +37,7 @@ def test_labelled_queries_hit_and_nonsense_stays_below_threshold() -> None:
 
 
 def test_empty_index_and_bootstrap_edges() -> None:
-    assert BM25([]).search("hola") == []
+    assert BM25([]).search("hello") == []
     assert bootstrap_mean([]) == (0.0, 0.0, 0.0)
     point, low, high = bootstrap_mean([True, False], seed=1, reps=50)
     assert 0.0 <= low <= point <= high <= 1.0
@@ -46,10 +46,10 @@ def test_empty_index_and_bootstrap_edges() -> None:
 
 def test_load_documents_reads_frontmatter(tmp_path: Path) -> None:
     (tmp_path / "note.md").write_text(
-        "id: faq-note\nlang: en\n\nBody about subtitulos and husos.\n",
+        "id: faq-note\nlang: en\n\nBody about captions and time zones.\n",
         encoding="utf-8",
     )
     docs = load_documents(tmp_path)
     assert docs[0].id == "faq-note"
     assert docs[0].lang == "en"
-    assert "subtitulos" in docs[0].text
+    assert "captions" in docs[0].text

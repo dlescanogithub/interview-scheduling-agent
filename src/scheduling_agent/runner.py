@@ -79,8 +79,8 @@ def load_scenarios(directory: Path) -> list[Scenario]:
             Scenario(
                 id=str(raw["id"]),
                 description=str(raw.get("description", "")),
-                candidate_id=str(raw.get("candidate_id", "cand-uno")),
-                lang=str(raw.get("lang", "es")),
+                candidate_id=str(raw.get("candidate_id", "cand-one")),
+                lang=str(raw.get("lang", "en")),
                 provider=str(raw.get("provider", "scripted")),
                 allowed_tools=[str(item) for item in raw.get("allowed_tools", [])],
                 steps=[_step(item) for item in steps],
@@ -235,7 +235,7 @@ def _steal_first_slot(ctx: RunContext) -> bool:
         ctx.calendar.force_book(
             booking_id=ctx.ids.next("race"),
             interviewer_id=str(slot["interviewer_id"]),
-            candidate_id="cand-dos",
+            candidate_id="cand-two",
             start=parse_iso(str(slot["start"])),
             end=parse_iso(str(slot["end"])),
         )

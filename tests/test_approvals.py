@@ -11,8 +11,8 @@ from scheduling_agent.config import Settings
 
 ARGS_A = {
     "booking_id": "book-a",
-    "candidate_id": "cand-uno",
-    "to": "candidata.uno@mail.example",
+    "candidate_id": "cand-one",
+    "to": "candidate.one@mail.example",
     "interviewer_id": "iv-ana",
     "start": "2026-04-14T12:00:00Z",
     "timezone": "America/Argentina/Buenos_Aires",

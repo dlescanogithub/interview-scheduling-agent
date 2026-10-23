@@ -1,7 +1,7 @@
 id: cancel
 description: Cancel after an explicit yes and a recruiter-approved notice.
-candidate_id: cand-uno
-lang: es
+candidate_id: cand-one
+lang: en
 provider: scripted
 allowed_tools:
 - get_booking
@@ -12,14 +12,14 @@ allowed_tools:
 fixture_bookings:
 - id: book-existing
   interviewer_id: iv-ana
-  candidate_id: cand-uno
+  candidate_id: cand-one
   start: '2026-04-15T13:00:00-03:00'
   end: '2026-04-15T13:45:00-03:00'
 steps:
 - role: user
-  text: Cancelá mi entrevista, por favor.
+  text: Please cancel my interview.
 - role: user
-  text: Sí, confirmo.
+  text: Yes, I confirm.
 - role: recruiter
   decision: approve
 expect:

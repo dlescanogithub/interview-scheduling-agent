@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scheduling-agent"
-version = "0.1.0"
+version = "0.1.1"
 description = "Synthetic lab: interview scheduling agent with gates, invariants and a mock calendar."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -11,7 +11,7 @@ The person in the session should always know what is proposed, what is booked, a
 | Easy change or cancel | The person can pick another option, refuse, or cancel an existing booking after a confirmation | Scenarios `user_changes_mind`, `cancel`, `user_refuses_confirmation` |
 | Say what happens next | After the yes, the text says a recruiter will approve the email and where it would go | Scripted copy |
 | No internal jargon in the reply | The person hears slots and approval, not effect classes | Copy review; not a machine check |
-| A person is always available | "Quiero una persona" and the failure paths hand off | Scenario `explicit_handoff` and the handoff metric |
+| A person is always available | "I want a person" and the failure paths hand off | Scenario `explicit_handoff` and the handoff metric |
 | Accessibility | The FAQ mentions captions, a companion, and remote access. That is copy, not a test with assistive technology | Design-only beyond the FAQ |
 
 Metrics on these flows are simulated-user metrics. See [METRICS.md](METRICS.md).

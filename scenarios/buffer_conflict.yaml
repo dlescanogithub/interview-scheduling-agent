@@ -1,7 +1,7 @@
 id: buffer_conflict
 description: A time inside the buffer is not offered.
-candidate_id: cand-uno
-lang: es
+candidate_id: cand-one
+lang: en
 provider: scripted
 allowed_tools:
 - list_availability
@@ -13,10 +13,10 @@ allowed_tools:
 - search_faq
 steps:
 - role: user
-  text: Quiero una entrevista con Ana Luz el 14 de abril de 2026 a las 12:30. Zona
-    America/Argentina/Buenos_Aires.
+  text: I want an interview with Ana Luz on April 14, 2026 at 12:30. My time zone
+    is America/Argentina/Buenos_Aires.
 - role: user
-  text: Sí, confirmo.
+  text: Yes, I confirm.
 - role: recruiter
   decision: approve
 expect:

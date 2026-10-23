@@ -25,7 +25,7 @@ def test_missing_cassette_key_raises_and_does_not_touch_sockets(
     monkeypatch.setattr("socket.socket", boom)
     provider = CassetteProvider({})
     request = CompletionRequest(
-        messages=[{"role": "user", "content": "hola"}], tools=[]
+        messages=[{"role": "user", "content": "hello"}], tools=[]
     )
     with pytest.raises(CassetteMiss):
         provider.complete(request)

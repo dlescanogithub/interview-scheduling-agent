@@ -16,9 +16,7 @@ from zoneinfo import ZoneInfo
 from scheduling_agent.retrieval import fold
 from scheduling_agent.roster import INTERVIEWERS
 from scheduling_agent.timeutil import (
-    MONTHS_ES,
     WEEKDAYS_EN,
-    WEEKDAYS_ES,
     combine_local,
     parse_iso,
     to_canonical,
@@ -30,21 +28,7 @@ _LINE = re.compile(
 _SLOT_LINE = re.compile(
     r"^(\d+)\)\s+\S+\s+(\d{2})/(\d{2})\s+(\d{2}:\d{2})\s+\(([^)]+)\)"
 )
-_SHORT_ACCEPT = re.compile(
-    r"^(?:(?:la|el|opcion|option)\s+([123])"
-    r"|(?:ese|esa|ese horario|that one|that slot))\.?$"
-)
-_SHORT_ES = {
-    "lunes": "lun",
-    "martes": "mar",
-    "miércoles": "mie",
-    "miercoles": "mie",
-    "jueves": "jue",
-    "viernes": "vie",
-    "sábado": "sab",
-    "sabado": "sab",
-    "domingo": "dom",
-}
+_SHORT_ACCEPT = re.compile(r"^(?:option\s+([123])|(?:that one|that slot))\.?$")
 _SHORT_EN = {
     "Monday": "Mon",
     "Tuesday": "Tue",
@@ -56,57 +40,41 @@ _SHORT_EN = {
 }
 _ZONE = re.compile(r"(?:America|Europe)(?:/[A-Za-z0-9_+-]+)+|\bUTC\b")
 _CLOCK = re.compile(r"\b(\d{1,2}:\d{2})\b")
-_YES = re.compile(r"\b(si|yes|confirmo|confirm|dale)\b")
-_OPTION = re.compile(r"\b(?:opcion|option)\s+(\d)\b")
-_CONFIRM_OPT = re.compile(r"confirmar la opcion (\d)|confirm option (\d)")
+_YES = re.compile(r"\b(yes|confirm)\b")
+_OPTION = re.compile(r"\boption\s+(\d)\b")
+_CONFIRM_OPT = re.compile(r"confirm option (\d)")
 _INJECTION = (
     "ignore the rules",
     "ignore previous",
     "email all candidates",
-    "ignora las reglas",
-    "envia el correo a todos",
 )
 _FAQ = (
-    "reprogram",
     "reschedul",
-    "politic",
     "policy",
-    "accesib",
+    "accessib",
     "privacy",
-    "privacid",
-    "zona horaria",
     "time zone",
     "prepar",
-    "camara",
     "camera",
-    "llegar tarde",
     "running late",
     "feedback",
-    "devoluc",
-    "remoto",
+    "remote room",
     "remote tool",
-    "subtitul",
     "caption",
-    "duracion",
     "duration",
-    "quien entrevista",
     "who interviews",
+    "companion",
+    "interpreter",
 )
 _OOD = (
-    "clima",
     "weather",
-    "receta",
     "recipe",
-    "acciones",
     "stock price",
 )
 _HANDOFF = (
-    "persona del equipo",
-    "persona real",
-    "hablar con una persona",
     "human please",
     "talk to a person",
-    "pasame con",
+    "person on the team",
 )
 
 
@@ -143,7 +111,7 @@ def parse_session(messages: list[dict[str, Any]]) -> SessionView:
             tz=fields["tz"],
             email=fields["email"],
             now=parse_iso(fields["now"]),
-            lang=fields.get("lang", "es"),
+            lang=fields.get("lang", "en"),
         )
     raise ValueError("session header missing")
 
@@ -203,41 +171,9 @@ def recruiter_decision(messages: list[dict[str, Any]]) -> dict[str, str] | None:
 
 
 def detect_lang(text: str, default: str) -> str:
-    folded = fold(text)
-    spanish = sum(
-        token in folded
-        for token in (
-            "hola",
-            "quiero",
-            "entrevista",
-            "opcion",
-            "necesito",
-            "confirmo",
-            "martes",
-            "zona",
-            "reprogram",
-            "cancela",
-        )
-    )
-    english = sum(
-        token in folded
-        for token in (
-            "hello",
-            "i want",
-            "interview",
-            "option",
-            "please",
-            "tuesday",
-            "schedule",
-            "reschedule",
-            "yes",
-        )
-    )
-    if english > spanish:
-        return "en"
-    if spanish > english:
-        return "es"
-    return default
+    """The dialogue is English. Session language does not switch the copy."""
+    del text, default
+    return "en"
 
 
 def has_injection(text: str) -> bool:
@@ -247,16 +183,16 @@ def has_injection(text: str) -> bool:
 
 def is_refusal(text: str) -> bool:
     folded = fold(text).strip()
-    if "no problem" in folded or "no hay" in folded:
+    if "no problem" in folded:
         return False
     if re.match(r"^no\b", folded):
         return True
     return any(
         phrase in folded
         for phrase in (
-            "no gracias",
-            "mejor no",
-            "no confirmo",
+            "no thanks",
+            "rather not",
+            "i do not confirm",
             "i refuse",
             "do not book",
         )
@@ -271,11 +207,11 @@ def is_yes(text: str) -> bool:
 
 def is_ambiguous_tuesday(text: str) -> bool:
     folded = fold(text)
-    if "martes que viene" not in folded and "next tuesday" not in folded:
+    if "next tuesday" not in folded:
         return False
     if re.search(r"\d{4}-\d{2}-\d{2}", text):
         return False
-    if re.search(r"\b\d{1,2}\s+de\s+(abril|mayo)\b", folded):
+    if re.search(r"\b(?:april|may)\s+\d{1,2}\b", folded):
         return False
     return True
 
@@ -284,8 +220,6 @@ def has_concrete_date(text: str) -> bool:
     if re.search(r"\d{4}-\d{2}-\d{2}", text):
         return True
     folded = fold(text)
-    if re.search(r"\b\d{1,2}\s+de\s+[a-z]+\s+de\s+\d{4}\b", folded):
-        return True
     return re.search(r"\b(?:april|may)\s+\d{1,2},?\s+\d{4}\b", folded) is not None
 
 
@@ -293,7 +227,7 @@ def is_concrete_booking(text: str) -> bool:
     folded = fold(text)
     if not has_concrete_date(text):
         return False
-    return "entrevista" in folded or "interview" in folded
+    return "interview" in folded
 
 
 def is_schedule_action(text: str) -> bool:
@@ -301,29 +235,20 @@ def is_schedule_action(text: str) -> bool:
         return True
     folded = fold(text)
     phrases = (
-        "quiero una entrevista",
-        "quiero entrevist",
-        "agendar",
         "i want an interview",
         "schedule an interview",
         "book an interview",
     )
     if any(phrase in folded for phrase in phrases):
         return True
-    return has_concrete_date(text) and ("entrevista" in folded or "interview" in folded)
+    return has_concrete_date(text) and "interview" in folded
 
 
 def is_cancel_action(text: str) -> bool:
     folded = fold(text)
-    if (
-        "como cancel" in folded
-        or "how do i cancel" in folded
-        or "how to cancel" in folded
-    ):
+    if "how do i cancel" in folded or "how to cancel" in folded:
         return False
     phrases = (
-        "cancela mi",
-        "cancela la entrevista",
         "cancel my interview",
         "cancel the interview",
     )
@@ -335,19 +260,17 @@ def is_reschedule_action(text: str) -> bool:
     if "?" in text and not has_concrete_date(text):
         return False
     phrases = (
-        "reprograma mi",
-        "reprogramar mi",
-        "reprograma la entrevista",
         "reschedule my",
         "move my interview",
-        "cambiar mi entrevista",
+        "change my interview",
     )
     return any(phrase in folded for phrase in phrases)
 
 
 def is_faq(text: str) -> bool:
     if (
-        is_concrete_booking(text)
+        is_schedule_action(text)
+        or is_concrete_booking(text)
         or is_cancel_action(text)
         or is_reschedule_action(text)
     ):
@@ -399,13 +322,6 @@ def extract_date(text: str) -> str | None:
     if iso:
         return iso.group(1)
     folded = fold(text)
-    spanish = re.search(r"\b(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(\d{4})\b", folded)
-    if spanish:
-        month = MONTHS_ES.get(spanish.group(2))
-        if month is not None:
-            return (
-                f"{int(spanish.group(3)):04d}-{month:02d}-{int(spanish.group(1)):02d}"
-            )
     english = re.search(r"\b(april|may)\s+(\d{1,2}),?\s+(\d{4})\b", folded)
     if english:
         month = {"april": 4, "may": 5}[english.group(1)]
@@ -432,7 +348,7 @@ def short_accept_index(text: str) -> int | None:
     """1-based option, or 0 when a bare yes accepts the pending slot.
 
     ``None`` means this turn is not a short confirmation. A longer sentence
-    such as "mejor la opción 2" stays on the restate path.
+    such as "I prefer option 2" stays on the restate path.
     """
     if is_refusal(text):
         return None
@@ -449,8 +365,7 @@ def confirm_index(text: str) -> int | None:
     match = _CONFIRM_OPT.search(fold(text))
     if match is None:
         return None
-    raw = match.group(1) or match.group(2)
-    return int(raw)
+    return int(match.group(1))
 
 
 def last_assistant_text(messages: list[dict[str, Any]]) -> str:
@@ -552,9 +467,9 @@ def select_slot(
 
 def format_slot_line(index: int, slot: dict[str, Any], lang: str) -> str:
     """Numbered slot. The clock always carries a zone and an offset."""
-    names = _SHORT_ES if lang == "es" else _SHORT_EN
-    weekday_key = str(slot["weekday_es"] if lang == "es" else slot["weekday_en"])
-    weekday = names.get(weekday_key, weekday_key[:3])
+    del lang
+    weekday_key = str(slot["weekday_en"])
+    weekday = _SHORT_EN.get(weekday_key, weekday_key[:3])
     local_date = str(slot["local_date"])
     day_month = f"{local_date[8:10]}/{local_date[5:7]}"
     phrase = zone_phrase(str(slot["interviewer_tz"]))
@@ -562,10 +477,7 @@ def format_slot_line(index: int, slot: dict[str, Any], lang: str) -> str:
     line += f" | {slot['interviewer_name']} | {slot['duration_minutes']} min"
     if slot.get("candidate_tz") != slot.get("interviewer_tz"):
         other = zone_phrase(str(slot["candidate_tz"]))
-        if lang == "es":
-            line += f" | candidato {slot['candidate_start']} ({other})"
-        else:
-            line += f" | candidate {slot['candidate_start']} ({other})"
+        line += f" | candidate {slot['candidate_start']} ({other})"
     return line
 
 
@@ -573,7 +485,7 @@ def render_pending_slot(slot: dict[str, Any] | None, index: int = 1) -> str:
     """One context line. `pending_slot: none` when nothing is waiting."""
     if slot is None:
         return "pending_slot: none"
-    label = format_slot_line(index, slot, "es").split(" | ", 1)[0]
+    label = format_slot_line(index, slot, "en").split(" | ", 1)[0]
     return (
         "pending_slot: "
         f"interviewer_id={slot['interviewer_id']} "
@@ -591,10 +503,8 @@ def proposal_text(
     lines = [
         format_slot_line(index, slot, lang) for index, slot in enumerate(slots, start=1)
     ]
-    if lang == "es":
-        ask = f"Respondé sí para confirmar la opción {confirm_option}."
-    else:
-        ask = f"Reply yes to confirm option {confirm_option}."
+    del lang
+    ask = f"Reply yes to confirm option {confirm_option}."
     return "\n".join([intro, *lines, ask])
 
 
@@ -685,6 +595,5 @@ def booking_slot_view(booking: dict[str, Any], candidate_tz: str) -> dict[str, A
         "candidate_tz": candidate_tz,
         "candidate_start": cand.strftime("%H:%M"),
         "candidate_end": cand_end.strftime("%H:%M"),
-        "weekday_es": WEEKDAYS_ES[local.weekday()],
         "weekday_en": WEEKDAYS_EN[local.weekday()],
     }

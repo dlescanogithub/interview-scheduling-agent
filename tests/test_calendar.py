@@ -38,7 +38,7 @@ def test_double_book_is_rejected_by_the_calendar() -> None:
     calendar.hold(
         hold_id="h1",
         interviewer_id="iv-ana",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         start=start,
         end=end,
         ttl_seconds=900,
@@ -47,19 +47,19 @@ def test_double_book_is_rejected_by_the_calendar() -> None:
         calendar.hold(
             hold_id="h2",
             interviewer_id="iv-ana",
-            candidate_id="cand-dos",
+            candidate_id="cand-two",
             start=start,
             end=end,
             ttl_seconds=900,
         )
     assert exc.value.code == "SLOT_TAKEN"
-    booking = calendar.book(booking_id="b1", hold_id="h1", candidate_id="cand-uno")
+    booking = calendar.book(booking_id="b1", hold_id="h1", candidate_id="cand-one")
     assert booking.status == "active"
     with pytest.raises(CalendarError) as taken:
         calendar.force_book(
             booking_id="b2",
             interviewer_id="iv-ana",
-            candidate_id="cand-dos",
+            candidate_id="cand-two",
             start=start,
             end=end,
         )
@@ -75,14 +75,14 @@ def test_hold_expires_when_the_injected_clock_advances() -> None:
     calendar.hold(
         hold_id="h1",
         interviewer_id="iv-ana",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         start=start,
         end=end,
         ttl_seconds=60,
     )
     clock.advance(61)
     with pytest.raises(CalendarError) as exc:
-        calendar.book(booking_id="b1", hold_id="h1", candidate_id="cand-uno")
+        calendar.book(booking_id="b1", hold_id="h1", candidate_id="cand-one")
     assert exc.value.code == "HOLD_EXPIRED"
     assert calendar.holds == {}
 
@@ -94,7 +94,7 @@ def test_buffer_blocks_the_adjacent_slot() -> None:
     calendar.force_book(
         booking_id="b1",
         interviewer_id="iv-ana",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         start=start,
         end=end,
     )
@@ -134,13 +134,13 @@ def test_hold_belongs_to_the_candidate_and_release() -> None:
     calendar.hold(
         hold_id="h1",
         interviewer_id="iv-bruno",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         start=start,
         end=end,
         ttl_seconds=900,
     )
     with pytest.raises(CalendarError) as refused:
-        calendar.book(booking_id="b1", hold_id="h1", candidate_id="cand-dos")
+        calendar.book(booking_id="b1", hold_id="h1", candidate_id="cand-two")
     assert refused.value.code == "REFUSED"
     released = calendar.release("h1")
     assert released.id == "h1"
@@ -155,20 +155,20 @@ def test_cancel_refuses_another_candidate() -> None:
     calendar.force_book(
         booking_id="b1",
         interviewer_id="iv-bruno",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         start=start,
         end=start + timedelta(minutes=45),
     )
     with pytest.raises(CalendarError) as exc:
-        calendar.cancel("b1", "cand-dos")
+        calendar.cancel("b1", "cand-two")
     assert exc.value.code == "REFUSED"
-    cancelled = calendar.cancel("b1", "cand-uno")
+    cancelled = calendar.cancel("b1", "cand-one")
     assert cancelled.status == "cancelled"
     with pytest.raises(CalendarError) as again:
-        calendar.cancel("b1", "cand-uno")
+        calendar.cancel("b1", "cand-one")
     assert again.value.code == "VALIDATION"
-    assert calendar.bookings_for("cand-uno") == []
-    assert len(calendar.bookings_for("cand-uno", active_only=False)) == 1
+    assert calendar.bookings_for("cand-one") == []
+    assert len(calendar.bookings_for("cand-one", active_only=False)) == 1
 
 
 def test_seeded_operations_never_double_book() -> None:
@@ -196,7 +196,7 @@ def test_seeded_operations_never_double_book() -> None:
         action = rng.randrange(4)
         if action == 0:
             slot = pool[rng.randrange(len(pool))]
-            candidate_id = ("cand-uno", "cand-dos", "cand-tres")[rng.randrange(3)]
+            candidate_id = ("cand-one", "cand-two", "cand-three")[rng.randrange(3)]
             seq += 1
             try:
                 hold = calendar.hold(

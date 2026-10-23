@@ -12,8 +12,8 @@ from scheduling_agent.tools import execute_tool
 
 EMAIL_A = {
     "booking_id": "book-a",
-    "candidate_id": "cand-uno",
-    "to": "candidata.uno@mail.example",
+    "candidate_id": "cand-one",
+    "to": "candidate.one@mail.example",
     "interviewer_id": "iv-ana",
     "start": "2026-04-14T12:00:00Z",
     "timezone": "America/Argentina/Buenos_Aires",
@@ -83,7 +83,7 @@ def test_approved_hash_does_not_send_a_different_invite() -> None:
     same = execute_tool(ctx, "send_invite_email", EMAIL_A)
     assert same["executed"] is True
     assert len(ctx.outbox) == 1
-    assert ctx.outbox[0].to == "candidata.uno@mail.example"
+    assert ctx.outbox[0].to == "candidate.one@mail.example"
 
 
 def test_rejected_and_cross_candidate_calls_do_not_execute() -> None:
@@ -93,10 +93,10 @@ def test_rejected_and_cross_candidate_calls_do_not_execute() -> None:
     again = execute_tool(ctx, "send_invite_email", EMAIL_A)
     assert again["status"] == "REJECTED"
     assert again["executed"] is False
-    other = execute_tool(ctx, "get_booking", {"candidate_id": "cand-dos"})
+    other = execute_tool(ctx, "get_booking", {"candidate_id": "cand-two"})
     assert other["status"] == "REFUSED"
     assert other["executed"] is False
-    wrong_to = {**EMAIL_B, "to": "candidato.dos@mail.example"}
+    wrong_to = {**EMAIL_B, "to": "candidate.two@mail.example"}
     wrong_inbox = execute_tool(ctx, "send_invite_email", wrong_to)
     assert wrong_inbox["status"] == "REFUSED"
 
@@ -119,14 +119,14 @@ def test_book_slot_needs_a_matching_confirmation() -> None:
         "hold_slot",
         {
             "interviewer_id": slot["interviewer_id"],
-            "candidate_id": "cand-uno",
+            "candidate_id": "cand-one",
             "start": slot["start"],
             "end": slot["end"],
         },
     )
     args = {
         "hold_id": held["output"]["hold_id"],
-        "candidate_id": "cand-uno",
+        "candidate_id": "cand-one",
         "interviewer_id": slot["interviewer_id"],
         "start": slot["start"],
         "end": slot["end"],
@@ -139,7 +139,7 @@ def test_book_slot_needs_a_matching_confirmation() -> None:
             "kind": "book",
             "slot_hash": slot_hash(
                 interviewer_id=slot["interviewer_id"],
-                candidate_id="cand-uno",
+                candidate_id="cand-one",
                 start=slot["start"],
                 end=slot["end"],
             ),
@@ -159,7 +159,7 @@ def test_cancel_needs_confirmation_and_release_works() -> None:
         "hold_slot",
         {
             "interviewer_id": "iv-elena",
-            "candidate_id": "cand-uno",
+            "candidate_id": "cand-one",
             "start": start,
             "end": end,
         },
@@ -167,13 +167,13 @@ def test_cancel_needs_confirmation_and_release_works() -> None:
     released = execute_tool(
         ctx,
         "release_hold",
-        {"hold_id": held["output"]["hold_id"], "candidate_id": "cand-uno"},
+        {"hold_id": held["output"]["hold_id"], "candidate_id": "cand-one"},
     )
     assert released["executed"] is True
     ctx.calendar.force_book(
         booking_id="book-fixed",
         interviewer_id="iv-elena",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         start=ctx.clock.now().replace(hour=16),
         end=ctx.clock.now().replace(hour=16, minute=45),
     )
@@ -184,20 +184,20 @@ def test_cancel_needs_confirmation_and_release_works() -> None:
     ctx.calendar.force_book(
         booking_id="book-fixed",
         interviewer_id="iv-elena",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         start=parse_iso(start),
         end=parse_iso(end),
     )
     blocked = execute_tool(
-        ctx, "cancel_booking", {"booking_id": "book-fixed", "candidate_id": "cand-uno"}
+        ctx, "cancel_booking", {"booking_id": "book-fixed", "candidate_id": "cand-one"}
     )
     assert blocked["status"] == "NEEDS_CONFIRMATION"
     ctx.confirmations.append({"kind": "cancel", "booking_id": "book-fixed"})
     cancelled = execute_tool(
-        ctx, "cancel_booking", {"booking_id": "book-fixed", "candidate_id": "cand-uno"}
+        ctx, "cancel_booking", {"booking_id": "book-fixed", "candidate_id": "cand-one"}
     )
     assert cancelled["executed"] is True
-    found = execute_tool(ctx, "get_booking", {"candidate_id": "cand-uno"})
+    found = execute_tool(ctx, "get_booking", {"candidate_id": "cand-one"})
     assert found["output"]["bookings"] == []
 
 

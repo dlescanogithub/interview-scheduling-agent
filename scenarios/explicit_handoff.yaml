@@ -1,12 +1,12 @@
 id: explicit_handoff
 description: The person asks for a human.
-candidate_id: cand-uno
-lang: es
+candidate_id: cand-one
+lang: en
 provider: scripted
 allowed_tools: []
 steps:
 - role: user
-  text: Quiero hablar con una persona del equipo.
+  text: I want to talk to a person on the team.
 expect:
   booked: false
   outbox_max: 0

@@ -1,7 +1,7 @@
 id: kill_switch
 description: External tools are off. The booking stays internal.
-candidate_id: cand-uno
-lang: es
+candidate_id: cand-one
+lang: en
 provider: scripted
 allowed_tools:
 - list_availability
@@ -14,9 +14,9 @@ allowed_tools:
 external_enabled: false
 steps:
 - role: user
-  text: Quiero una entrevista con Ana Luz el 14 de abril de 2026. Zona America/Argentina/Buenos_Aires.
+  text: I want an interview with Ana Luz on April 14, 2026. My time zone is America/Argentina/Buenos_Aires.
 - role: user
-  text: Sí, confirmo.
+  text: Yes, I confirm.
 expect:
   booked: true
   outbox_max: 0

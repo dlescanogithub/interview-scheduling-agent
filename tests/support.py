@@ -21,7 +21,7 @@ FAQ = ROOT / "data" / "faq"
 
 def make_ctx(
     settings: Settings | None = None,
-    candidate_id: str = "cand-uno",
+    candidate_id: str = "cand-one",
 ) -> RunContext:
     active = settings if settings is not None else Settings()
     clock = FixedClock(parse_iso(active.now_iso))
@@ -34,7 +34,7 @@ def make_ctx(
         candidate_name=candidate.name,
         candidate_email=candidate.email,
         candidate_tz=candidate.timezone,
-        lang="es",
+        lang="en",
         clock=clock,
         calendar=calendar,
         approvals=ApprovalStore(clock, active.approval_ttl_seconds),

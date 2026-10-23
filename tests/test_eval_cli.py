@@ -50,10 +50,10 @@ def test_cli_demo_eval_and_live_refusal(capsys: pytest.CaptureFixture[str]) -> N
 
 def test_interactive_lines_and_quit(monkeypatch: pytest.MonkeyPatch) -> None:
     replies = run_interactive_lines(
-        ["Quiero una entrevista con Ana Luz el 14 de abril de 2026."]
+        ["I want an interview with Ana Luz on April 14, 2026."]
     )
     assert replies
-    answers = iter(["hola", "salir"])
+    answers = iter(["hello", "quit"])
     monkeypatch.setattr("builtins.input", lambda _prompt="": next(answers))
     assert main(["demo", "--interactive"]) == 0
 
@@ -71,9 +71,9 @@ def test_cost_cap_handoff_does_not_call_the_provider() -> None:
     )
     ctx = make_ctx(settings)
     agent = Agent(ctx, Boom())
-    text = agent.handle_user("hola")
+    text = agent.handle_user("hello")
     assert ctx.terminal == "handoff"
-    assert "persona" in text
+    assert "person" in text
     assert ctx.tool_calls == 0
 
 
@@ -86,7 +86,7 @@ def test_spend_cap_error_is_not_retried() -> None:
 
     ctx = make_ctx()
     agent = Agent(ctx, Once(), sleeper=sleeps.append)
-    agent.handle_user("hola")
+    agent.handle_user("hello")
     assert sleeps == []
     assert ctx.terminal == "handoff"
 
@@ -94,7 +94,7 @@ def test_spend_cap_error_is_not_retried() -> None:
 def test_provider_errors_retry_then_handoff() -> None:
     ctx = make_ctx(replace(Settings(), retry_attempts=2))
     agent = Agent(ctx, FailNProvider(ScriptedProvider(), 5))
-    agent.handle_user("hola")
+    agent.handle_user("hello")
     assert ctx.terminal == "handoff"
     assert any(event.kind == "provider_error" for event in ctx.trace.events)
 
@@ -106,7 +106,7 @@ def test_max_turns_hands_off_before_a_call() -> None:
 
     ctx = make_ctx(Settings(max_turns=0))
     agent = Agent(ctx, Boom())
-    agent.handle_user("hola")
+    agent.handle_user("hello")
     assert ctx.terminal == "handoff"
 
 

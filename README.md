@@ -251,7 +251,7 @@ A naive datetime such as `2026-04-14T00:00:00` is rejected. It is not read as UT
 
 | Doc | What it is for |
 | --- | --- |
-| [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) | Interview walkthrough |
+| [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) | Walkthrough for engineers and buyers |
 | [docs/BUSINESS_VALUE.md](docs/BUSINESS_VALUE.md) | Value plan inside the repo's own [EST] hours model |
 | [docs/BUSINESS_CASE.md](docs/BUSINESS_CASE.md) | Recruiter-hours formula, all figures [EST], no wage |
 | [docs/DISCOVERY.md](docs/DISCOVERY.md) | Ten questions and what the answer changes |

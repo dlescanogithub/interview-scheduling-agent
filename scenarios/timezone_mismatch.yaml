@@ -1,6 +1,6 @@
 id: timezone_mismatch
 description: Candidate zone is New York; the interviewer is in Buenos Aires.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

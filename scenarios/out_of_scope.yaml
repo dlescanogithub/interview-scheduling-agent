@@ -1,6 +1,6 @@
 id: out_of_scope
 description: A question outside interviews.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

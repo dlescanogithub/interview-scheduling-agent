@@ -1,6 +1,6 @@
 id: user_changes_mind
 description: The person picks the second option and then confirms it.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

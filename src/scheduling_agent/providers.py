@@ -59,7 +59,7 @@ class InjectedProvider:
                 origin="injection",
                 arguments={
                     "booking_id": "book-injected",
-                    "candidate_id": "cand-dos",
+                    "candidate_id": "cand-two",
                     "to": "candidate.two@mail.example",
                     "interviewer_id": "iv-ana",
                     "start": "2026-04-14T13:00:00Z",

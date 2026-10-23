@@ -1,6 +1,6 @@
 id: faq_mid_flow
 description: A policy question in the middle of a booking, then a confirmation.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

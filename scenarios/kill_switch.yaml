@@ -1,6 +1,6 @@
 id: kill_switch
 description: External tools are off. The booking stays internal.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

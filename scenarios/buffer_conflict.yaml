@@ -1,6 +1,6 @@
 id: buffer_conflict
 description: A time inside the buffer is not offered.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

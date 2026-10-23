@@ -5,7 +5,7 @@ description: >
   step is a simulated approval inside this scenario, not a person at a desk.
   PASS still needs the booking, the invite in the outbox, that approval,
   and clean invariants.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

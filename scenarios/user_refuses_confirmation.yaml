@@ -1,6 +1,6 @@
 id: user_refuses_confirmation
 description: The person says no. Nothing is booked.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

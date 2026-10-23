@@ -1,6 +1,6 @@
 id: reschedule
 description: Move an existing booking after a yes, then send a reschedule notice.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:
@@ -15,7 +15,7 @@ allowed_tools:
 fixture_bookings:
 - id: book-existing
   interviewer_id: iv-ana
-  candidate_id: cand-uno
+  candidate_id: cand-one
   start: '2026-04-15T13:00:00-03:00'
   end: '2026-04-15T13:45:00-03:00'
 steps:

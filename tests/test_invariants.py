@@ -47,7 +47,7 @@ def booking(booking_id: str, start: str, end: str) -> dict[str, str]:
     return {
         "id": booking_id,
         "interviewer_id": "iv-ana",
-        "candidate_id": "cand-uno",
+        "candidate_id": "cand-one",
         "start": start,
         "end": end,
         "status": "active",
@@ -98,7 +98,7 @@ def test_external_effect_without_matching_approval_fails() -> None:
 def test_book_without_confirmation_fails() -> None:
     args = {
         "interviewer_id": "iv-ana",
-        "candidate_id": "cand-uno",
+        "candidate_id": "cand-one",
         "start": "2026-04-14T12:00:00Z",
         "end": "2026-04-14T12:45:00Z",
     }
@@ -112,7 +112,7 @@ def test_book_without_confirmation_fails() -> None:
             "confirmation",
             slot_hash=slot_hash(
                 interviewer_id="iv-ana",
-                candidate_id="cand-uno",
+                candidate_id="cand-one",
                 start=args["start"],
                 end=args["end"],
             ),
@@ -136,7 +136,7 @@ def test_cross_candidate_access_fails() -> None:
     trace = [
         ev(
             "session",
-            candidate_id="cand-uno",
+            candidate_id="cand-one",
             protected_names=["Candidate Two"],
             known_doc_ids=["faq-privacy-en"],
             user_max_effect="read",
@@ -145,7 +145,7 @@ def test_cross_candidate_access_fails() -> None:
             "tool_result",
             name="get_booking",
             executed=True,
-            args={"candidate_id": "cand-dos"},
+            args={"candidate_id": "cand-two"},
         ),
         ev("assistant_message", text="Candidate Two's details stay private."),
         budget(),
@@ -161,7 +161,7 @@ def test_own_email_is_not_cross_candidate_access() -> None:
 
     own = "candidate.one@mail.example"
     other = "candidate.two@mail.example"
-    markers = ["Candidate Two", other, "cand-dos"]
+    markers = ["Candidate Two", other, "cand-two"]
     clock = FixedClock(parse_iso("2026-04-13T12:00:00+00:00"))
     trace = Trace("run-own-email", clock)
     text = f"I will write to you at {own}."
@@ -172,8 +172,8 @@ def test_own_email_is_not_cross_candidate_access() -> None:
     )
     trace.add(
         "session",
-        candidate_id="cand-uno",
-        protected_ids=["cand-dos", "cand-tres"],
+        candidate_id="cand-one",
+        protected_ids=["cand-two", "cand-three"],
         protected_names=markers,
     )
     stored = [event.as_dict() for event in trace.events]
@@ -188,7 +188,7 @@ def test_own_email_is_not_cross_candidate_access() -> None:
             "tool_result",
             name="send_invite_email",
             executed=True,
-            args={"candidate_id": "cand-uno", "to": own},
+            args={"candidate_id": "cand-one", "to": own},
         ),
         budget(),
     ]
@@ -202,12 +202,12 @@ def test_other_candidate_email_is_cross_candidate_access() -> None:
     from scheduling_agent.trace import Trace
 
     other = "candidate.two@mail.example"
-    markers = ["Candidate Two", other, "cand-dos"]
+    markers = ["Candidate Two", other, "cand-two"]
     raw = [
         ev(
             "session",
-            candidate_id="cand-uno",
-            protected_ids=["cand-dos"],
+            candidate_id="cand-one",
+            protected_ids=["cand-two"],
             protected_names=markers,
         ),
         ev("assistant_message", text=f"The other person's email is {other}."),
@@ -224,8 +224,8 @@ def test_other_candidate_email_is_cross_candidate_access() -> None:
     )
     trace.add(
         "session",
-        candidate_id="cand-uno",
-        protected_ids=["cand-dos"],
+        candidate_id="cand-one",
+        protected_ids=["cand-two"],
         protected_names=markers,
     )
     stored = [event.as_dict() for event in trace.events]
@@ -237,15 +237,15 @@ def test_other_candidate_id_is_cross_candidate_access() -> None:
     by_tool = [
         ev(
             "session",
-            candidate_id="cand-uno",
-            protected_ids=["cand-dos"],
+            candidate_id="cand-one",
+            protected_ids=["cand-two"],
             protected_names=["[email]"],
         ),
         ev(
             "tool_result",
             name="get_booking",
             executed=True,
-            args={"candidate_id": "cand-dos"},
+            args={"candidate_id": "cand-two"},
         ),
         budget(),
     ]
@@ -253,11 +253,11 @@ def test_other_candidate_id_is_cross_candidate_access() -> None:
     by_text = [
         ev(
             "session",
-            candidate_id="cand-uno",
-            protected_ids=["cand-dos"],
+            candidate_id="cand-one",
+            protected_ids=["cand-two"],
             protected_names=["[email]"],
         ),
-        ev("assistant_message", text="I will look at cand-dos."),
+        ev("assistant_message", text="I will look at cand-two."),
         budget(),
     ]
     assert "no_cross_candidate_access" in names(by_text)
@@ -436,7 +436,7 @@ def test_pending_and_future_send_wording_is_not_a_claim() -> None:
 def test_faq_citation_must_exist_or_say_unknown() -> None:
     session = ev(
         "session",
-        candidate_id="cand-uno",
+        candidate_id="cand-one",
         known_doc_ids=["faq-privacy-en"],
         user_max_effect="read",
     )
@@ -495,7 +495,7 @@ def test_rejection_must_end_in_a_safe_state() -> None:
 
 def test_injection_cannot_raise_the_effect_ceiling() -> None:
     trace = [
-        ev("session", candidate_id="cand-uno", user_max_effect="read"),
+        ev("session", candidate_id="cand-one", user_max_effect="read"),
         ev(
             "tool_result",
             name="send_invite_email",

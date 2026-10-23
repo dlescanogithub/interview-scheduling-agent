@@ -1,6 +1,6 @@
 id: ambiguous_date
 description: Next Tuesday is ambiguous, so the assistant asks which date.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

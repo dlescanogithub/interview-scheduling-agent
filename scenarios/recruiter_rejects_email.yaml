@@ -1,6 +1,6 @@
 id: recruiter_rejects_email
 description: The recruiter rejects the email. It is not retried.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

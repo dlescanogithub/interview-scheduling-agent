@@ -162,7 +162,7 @@ def _interactive() -> int:
     clock = FixedClock(parse_iso(settings.now_iso))
     calendar = load_calendar(root / "data" / "calendar" / "taller_aurora.yaml", clock)
     documents = load_documents(root / "data" / "faq")
-    candidate = calendar.candidates["cand-uno"]
+    candidate = calendar.candidates["cand-one"]
     ctx = RunContext(
         run_id="run-interactive",
         candidate_id=candidate.id,
@@ -251,7 +251,7 @@ def run_interactive_lines(lines: list[str]) -> list[str]:
     clock = FixedClock(parse_iso(settings.now_iso))
     calendar = load_calendar(root / "data" / "calendar" / "taller_aurora.yaml", clock)
     documents = load_documents(root / "data" / "faq")
-    candidate = calendar.candidates["cand-uno"]
+    candidate = calendar.candidates["cand-one"]
     ctx = RunContext(
         run_id="run-lines",
         candidate_id=candidate.id,

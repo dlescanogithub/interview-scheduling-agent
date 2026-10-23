@@ -66,15 +66,15 @@ interviewers:
         end: "2026-04-15T13:00:00+00:00"
         reason: internal clinic
 candidates:
-  - id: cand-uno
+  - id: cand-one
     name: Candidate One
     email: candidate.one@mail.example
     timezone: America/Argentina/Buenos_Aires
-  - id: cand-dos
+  - id: cand-two
     name: Candidate Two
     email: candidate.two@mail.example
     timezone: UTC
-  - id: cand-tres
+  - id: cand-three
     name: Candidate Three
     email: candidate.three@mail.example
     timezone: America/New_York

@@ -10,7 +10,7 @@ from scheduling_agent.tools import execute_tool
 
 EMAIL_A = {
     "booking_id": "book-a",
-    "candidate_id": "cand-uno",
+    "candidate_id": "cand-one",
     "to": "candidate.one@mail.example",
     "interviewer_id": "iv-ana",
     "start": "2026-04-14T12:00:00Z",

@@ -1,6 +1,6 @@
 id: no_availability
 description: Requested hour is busy; up to three alternatives are offered.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

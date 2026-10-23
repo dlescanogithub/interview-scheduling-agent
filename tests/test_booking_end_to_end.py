@@ -137,7 +137,7 @@ class FlowTransport:
                 "hold_slot",
                 {
                     "interviewer_id": slot["interviewer_id"],
-                    "candidate_id": "cand-uno",
+                    "candidate_id": "cand-one",
                     "start": slot["start"],
                     "end": slot["end"],
                 },
@@ -157,7 +157,7 @@ class FlowTransport:
                 "book_slot",
                 {
                     "hold_id": hold_id,
-                    "candidate_id": "cand-uno",
+                    "candidate_id": "cand-one",
                     "interviewer_id": slot["interviewer_id"],
                     "start": slot["start"],
                     "end": slot["end"],
@@ -195,7 +195,7 @@ class FlowTransport:
                 "send_invite_email",
                 {
                     "booking_id": booking_id,
-                    "candidate_id": "cand-uno",
+                    "candidate_id": "cand-one",
                     "to": _EMAIL,
                     "interviewer_id": slot["interviewer_id"],
                     "start": slot["start"],
@@ -212,7 +212,7 @@ class FlowTransport:
                 "send_invite_email",
                 {
                     "booking_id": booking_id,
-                    "candidate_id": "cand-uno",
+                    "candidate_id": "cand-one",
                     "to": _EMAIL,
                     "interviewer_id": slot["interviewer_id"],
                     "start": slot["start"],

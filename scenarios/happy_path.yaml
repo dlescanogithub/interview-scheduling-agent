@@ -1,6 +1,6 @@
 id: happy_path
 description: Book with an explicit yes and a recruiter-approved invite.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

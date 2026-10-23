@@ -67,7 +67,7 @@ def test_short_yes_books_the_pending_slot(tmp_path: Path) -> None:
     line = format_slot_line(1, slot, "en").split(" | ", 1)[0]
     hold = {
         "interviewer_id": slot["interviewer_id"],
-        "candidate_id": "cand-uno",
+        "candidate_id": "cand-one",
         "start": slot["start"],
         "end": slot["end"],
     }

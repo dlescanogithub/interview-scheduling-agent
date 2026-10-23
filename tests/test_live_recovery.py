@@ -223,5 +223,5 @@ def test_prompt_round_trip_keeps_the_session_header() -> None:
 
     ctx = make_ctx()
     view = parse_session([{"role": "system", "content": _system_prompt(ctx)}])
-    assert view.candidate_id == "cand-uno"
+    assert view.candidate_id == "cand-one"
     assert view.now.year == 2026

@@ -1,6 +1,6 @@
 id: tool_failure_handoff
 description: The provider fails until retries are exhausted.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools: []

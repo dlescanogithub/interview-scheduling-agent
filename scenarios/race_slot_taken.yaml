@@ -1,6 +1,6 @@
 id: race_slot_taken
 description: The proposed slot is taken before confirmation.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

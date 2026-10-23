@@ -1,6 +1,6 @@
 id: hold_expiry
 description: The hold expires before booking and the person confirms again.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:

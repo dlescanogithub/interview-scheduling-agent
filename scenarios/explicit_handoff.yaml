@@ -1,6 +1,6 @@
 id: explicit_handoff
 description: The person asks for a human.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools: []

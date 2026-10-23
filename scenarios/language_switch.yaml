@@ -1,6 +1,6 @@
 id: language_switch
 description: An English request is confirmed by naming option 1.
-candidate_id: cand-uno
+candidate_id: cand-one
 lang: en
 provider: scripted
 allowed_tools:
